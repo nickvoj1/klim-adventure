@@ -1,19 +1,29 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { GameScreen as GameScreenType, GameProgress } from '@/game/types';
-import { DEFAULT_PROGRESS } from '@/game/constants';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import { GameScreen as GameScreenType, GameProgress, LevelStats } from '@/game/types';
+import { DEFAULT_PROGRESS, ACHIEVEMENTS, DAILY_REWARDS } from '@/game/constants';
 import MainMenu from '@/components/game/MainMenu';
 import GameScreen from '@/components/game/GameScreen';
 import GameOverScreen from '@/components/game/GameOverScreen';
 import WorldMap from '@/components/game/WorldMap';
 import SkinSelector from '@/components/game/SkinSelector';
 import ShopScreen from '@/components/game/ShopScreen';
+import AchievementsScreen from '@/components/game/AchievementsScreen';
+import LevelCompleteScreen from '@/components/game/LevelCompleteScreen';
+import DailyReward from '@/components/game/DailyReward';
 
 const STORAGE_KEY = 'pixel-platformer-progress';
 
 function loadProgress(): GameProgress {
   try {
     const data = localStorage.getItem(STORAGE_KEY);
-    if (data) return JSON.parse(data);
+    if (data) {
+      const parsed = JSON.parse(data);
+      // Migrate old saves
+      return {
+        ...DEFAULT_PROGRESS(),
+        ...parsed,
+      };
+    }
   } catch {}
   return DEFAULT_PROGRESS();
 }
@@ -27,17 +37,40 @@ const Index = () => {
   const [progress, setProgress] = useState<GameProgress>(loadProgress);
   const [levelCoins, setLevelCoins] = useState(0);
   const [playingLevel, setPlayingLevel] = useState(0);
+  const [lastStats, setLastStats] = useState<LevelStats | null>(null);
+  const [showDailyReward, setShowDailyReward] = useState(false);
 
   // Persist progress
   useEffect(() => {
     saveProgress(progress);
   }, [progress]);
 
+  // Check daily reward on mount
+  useEffect(() => {
+    const now = Date.now();
+    const lastClaim = progress.lastDailyReward || 0;
+    const hoursSince = (now - lastClaim) / (1000 * 60 * 60);
+    if (hoursSince >= 24) {
+      setShowDailyReward(true);
+    }
+  }, []);
+
+  // Check if daily reward is available
+  const hasDailyReward = useMemo(() => {
+    const now = Date.now();
+    const hoursSince = (now - (progress.lastDailyReward || 0)) / (1000 * 60 * 60);
+    return hoursSince >= 24;
+  }, [progress.lastDailyReward]);
+
+  // Count unclaimed achievements
+  const unclaimedAchievements = useMemo(() => {
+    return ACHIEVEMENTS.filter(a => a.check(progress) && !progress.unlockedAchievements.includes(a.id)).length;
+  }, [progress]);
+
   // Opened chests tracking
   const openedChests = new Set<string>();
   progress.unlockedSkins.forEach((unlocked, i) => {
     if (unlocked && i > 0 && i < 30) {
-      // Find which level this skin belongs to (skinIndex matches level chest)
       openedChests.add(`${i - 1}-${i}`);
     }
   });
@@ -53,17 +86,25 @@ const Index = () => {
     setScreen('playing');
   }, []);
 
-  const handleLevelComplete = useCallback((coins: number) => {
+  const handleLevelComplete = useCallback((coins: number, stats: LevelStats) => {
+    setLastStats(stats);
     setProgress(p => {
       const newProgress = { ...p };
       newProgress.totalCoins += coins;
       newProgress.currentLevel = playingLevel + 1;
+      newProgress.totalLevelsCompleted = (p.totalLevelsCompleted || 0) + 1;
+      newProgress.totalRobotsKilled = (p.totalRobotsKilled || 0) + stats.robotsKilled;
       if (playingLevel + 1 >= p.unlockedLevels) {
         newProgress.unlockedLevels = playingLevel + 2;
       }
+      const bestTimes = { ...(p.bestLevelTimes || {}) };
+      if (!bestTimes[playingLevel] || stats.timeTaken < bestTimes[playingLevel]) {
+        bestTimes[playingLevel] = stats.timeTaken;
+      }
+      newProgress.bestLevelTimes = bestTimes;
       return newProgress;
     });
-    setScreen('worldmap');
+    setScreen('levelcomplete');
   }, [playingLevel]);
 
   const handleGameOver = useCallback(() => {
@@ -84,7 +125,7 @@ const Index = () => {
     setProgress(p => {
       const skins = [...p.unlockedSkins];
       skins[skinIndex] = true;
-      return { ...p, unlockedSkins: skins };
+      return { ...p, unlockedSkins: skins, totalChestsOpened: (p.totalChestsOpened || 0) + 1 };
     });
   }, []);
 
@@ -101,14 +142,69 @@ const Index = () => {
     });
   }, []);
 
+  const handleClaimDailyReward = useCallback((coins: number) => {
+    setProgress(p => {
+      const now = Date.now();
+      const hoursSince = (now - (p.lastDailyReward || 0)) / (1000 * 60 * 60);
+      let newStreak = hoursSince < 48 ? Math.min((p.dailyStreak || 0) + 1, 7) : 1;
+
+      const newProgress = {
+        ...p,
+        totalCoins: p.totalCoins + coins,
+        dailyStreak: newStreak >= 7 ? 0 : newStreak,
+        lastDailyReward: now,
+      };
+
+      // Day 7 bonus: unlock random locked skin
+      if (newStreak >= 7) {
+        const lockedSkins = p.unlockedSkins.map((u, i) => (!u ? i : -1)).filter(i => i >= 0);
+        if (lockedSkins.length > 0) {
+          const randomSkin = lockedSkins[Math.floor(Math.random() * lockedSkins.length)];
+          const skins = [...newProgress.unlockedSkins];
+          skins[randomSkin] = true;
+          newProgress.unlockedSkins = skins;
+        }
+      }
+
+      return newProgress;
+    });
+    setShowDailyReward(false);
+  }, []);
+
+  const handleClaimAchievement = useCallback((achievementId: string, reward: number) => {
+    setProgress(p => ({
+      ...p,
+      totalCoins: p.totalCoins + reward,
+      unlockedAchievements: [...(p.unlockedAchievements || []), achievementId],
+    }));
+  }, []);
+
+  const handleNextLevel = useCallback(() => {
+    setPlayingLevel(prev => prev + 1);
+    setLevelCoins(0);
+    setProgress(p => ({ ...p, lives: 3 }));
+    setScreen('playing');
+  }, []);
+
   return (
     <div className="flex flex-col items-center justify-center min-h-svh bg-background p-2 sm:p-4 overflow-hidden">
+      {showDailyReward && screen === 'menu' && (
+        <DailyReward
+          streak={progress.dailyStreak || 0}
+          onClaim={handleClaimDailyReward}
+          onClose={() => setShowDailyReward(false)}
+        />
+      )}
+
       {screen === 'menu' && (
         <MainMenu
           onPlay={handlePlay}
           onShop={() => setScreen('shop')}
           onSkins={() => setScreen('skins')}
+          onAchievements={() => setScreen('achievements')}
           totalCoins={progress.totalCoins}
+          hasDailyReward={hasDailyReward}
+          unclaimedAchievements={unclaimedAchievements}
         />
       )}
 
@@ -136,6 +232,15 @@ const Index = () => {
         />
       )}
 
+      {screen === 'levelcomplete' && lastStats && (
+        <LevelCompleteScreen
+          levelIndex={playingLevel}
+          stats={lastStats}
+          onNextLevel={handleNextLevel}
+          onWorldMap={() => setScreen('worldmap')}
+        />
+      )}
+
       {screen === 'gameover' && (
         <GameOverScreen
           onRetry={handleRetry}
@@ -158,6 +263,14 @@ const Index = () => {
           totalCoins={progress.totalCoins}
           unlockedSkins={progress.unlockedSkins}
           onBuy={handleBuySkin}
+          onBack={() => setScreen('menu')}
+        />
+      )}
+
+      {screen === 'achievements' && (
+        <AchievementsScreen
+          progress={progress}
+          onClaimReward={handleClaimAchievement}
           onBack={() => setScreen('menu')}
         />
       )}

@@ -1,4 +1,4 @@
-import { Skin } from './types';
+import { Skin, Achievement, GameProgress } from './types';
 
 export const CANVAS_WIDTH = 800;
 export const CANVAS_HEIGHT = 400;
@@ -39,17 +39,62 @@ export const SKINS: Skin[] = [
   { name: 'Clown', bodyColor: '#ff4488', headColor: '#ffffff', hairColor: '#ff0000', pantsColor: '#44cc44', premium: false, price: 0 },
   { name: 'Ghost', bodyColor: '#ccccdd', headColor: '#eeeeff', hairColor: '#bbbbcc', pantsColor: '#aaaabb', premium: false, price: 0 },
   { name: 'Alien', bodyColor: '#44cc44', headColor: '#66ee66', hairColor: '#228822', pantsColor: '#337733', premium: false, price: 0 },
-  // Premium skins (30-39)
-  { name: 'Golden Hero', bodyColor: '#ffcc00', headColor: '#ffee88', hairColor: '#cc9900', pantsColor: '#ddaa00', premium: true, price: 100 },
-  { name: 'Diamond Knight', bodyColor: '#88ddff', headColor: '#ccffff', hairColor: '#66aacc', pantsColor: '#5599bb', premium: true, price: 250 },
-  { name: 'Flame Lord', bodyColor: '#ff4400', headColor: '#ffaa44', hairColor: '#ff6600', pantsColor: '#cc2200', premium: true, price: 500 },
-  { name: 'Frost Mage', bodyColor: '#4488ff', headColor: '#aaddff', hairColor: '#88bbff', pantsColor: '#2266dd', premium: true, price: 750 },
-  { name: 'Shadow King', bodyColor: '#220033', headColor: '#553366', hairColor: '#110022', pantsColor: '#110022', premium: true, price: 1000 },
-  { name: 'Neon Runner', bodyColor: '#00ff88', headColor: '#88ffcc', hairColor: '#00cc66', pantsColor: '#009944', premium: true, price: 100 },
-  { name: 'Cyber Punk', bodyColor: '#ff00ff', headColor: '#ffaaff', hairColor: '#cc00cc', pantsColor: '#880088', premium: true, price: 250 },
-  { name: 'Pixel King', bodyColor: '#ff8800', headColor: '#ffcc88', hairColor: '#cc6600', pantsColor: '#aa4400', premium: true, price: 500 },
-  { name: 'Star Walker', bodyColor: '#ffff44', headColor: '#ffffaa', hairColor: '#cccc00', pantsColor: '#aaaa00', premium: true, price: 750 },
-  { name: 'Dark Matter', bodyColor: '#111122', headColor: '#333355', hairColor: '#000011', pantsColor: '#000011', premium: true, price: 1000 },
+  // Premium Meme Skins (30-39)
+  { name: 'Skibidi Man', bodyColor: '#6644cc', headColor: '#aa88ff', hairColor: '#4422aa', pantsColor: '#3311aa', premium: true, price: 100 },
+  { name: 'Ohio Explorer', bodyColor: '#cc2222', headColor: '#ffcc88', hairColor: '#111111', pantsColor: '#1a1a1a', premium: true, price: 100 },
+  { name: 'Rizz Lord', bodyColor: '#ffaa00', headColor: '#ffddaa', hairColor: '#ff66aa', pantsColor: '#cc8800', premium: true, price: 250 },
+  { name: 'Sigma Boss', bodyColor: '#222222', headColor: '#aaaaaa', hairColor: '#111111', pantsColor: '#333333', premium: true, price: 250 },
+  { name: 'Grimace Shake', bodyColor: '#7722cc', headColor: '#9944ee', hairColor: '#6611bb', pantsColor: '#5500aa', premium: true, price: 500 },
+  { name: 'Among Us', bodyColor: '#dd2222', headColor: '#88ccff', hairColor: '#dd2222', pantsColor: '#aa1111', premium: true, price: 500 },
+  { name: 'Wednesday', bodyColor: '#111111', headColor: '#eeddcc', hairColor: '#000000', pantsColor: '#222222', premium: true, price: 750 },
+  { name: 'Baby Gronk', bodyColor: '#33aa55', headColor: '#ffcc88', hairColor: '#ffcc00', pantsColor: '#228844', premium: true, price: 750 },
+  { name: 'Nyan Runner', bodyColor: '#ff6699', headColor: '#ffaacc', hairColor: '#ffff00', pantsColor: '#6699ff', premium: true, price: 1000 },
+  { name: 'Mog Master', bodyColor: '#116666', headColor: '#44aaaa', hairColor: '#004444', pantsColor: '#005555', premium: true, price: 1000 },
+];
+
+export const DAILY_REWARDS = [10, 25, 50, 75, 100, 150, 200];
+
+export const ACHIEVEMENTS: Achievement[] = [
+  {
+    id: 'first_steps', name: 'First Steps', description: 'Complete Level 1',
+    icon: '👟', reward: 10, rewardType: 'coins',
+    check: (p) => p.totalLevelsCompleted >= 1,
+  },
+  {
+    id: 'coin_collector', name: 'Coin Collector', description: 'Collect 100 total coins',
+    icon: '🪙', reward: 25, rewardType: 'coins',
+    check: (p) => p.totalCoins >= 100,
+  },
+  {
+    id: 'skin_collector', name: 'Skin Collector', description: 'Unlock 5 skins',
+    icon: '🎨', reward: 50, rewardType: 'coins',
+    check: (p) => p.unlockedSkins.filter(Boolean).length >= 5,
+  },
+  {
+    id: 'speed_runner', name: 'Speed Runner', description: 'Complete a level in under 60s',
+    icon: '⚡', reward: 50, rewardType: 'coins',
+    check: (p) => Object.values(p.bestLevelTimes).some(t => t < 60),
+  },
+  {
+    id: 'robot_slayer', name: 'Robot Slayer', description: 'Defeat 10 robots total',
+    icon: '🤖', reward: 75, rewardType: 'coins',
+    check: (p) => p.totalRobotsKilled >= 10,
+  },
+  {
+    id: 'rich_kid', name: 'Rich Kid', description: 'Have 500 coins at once',
+    icon: '💰', reward: 100, rewardType: 'coins',
+    check: (p) => p.totalCoins >= 500,
+  },
+  {
+    id: 'explorer', name: 'Explorer', description: 'Open 5 chests',
+    icon: '📦', reward: 100, rewardType: 'coins',
+    check: (p) => p.totalChestsOpened >= 5,
+  },
+  {
+    id: 'world_traveler', name: 'World Traveler', description: 'Complete 10 levels',
+    icon: '🌍', reward: 200, rewardType: 'coins',
+    check: (p) => p.totalLevelsCompleted >= 10,
+  },
 ];
 
 export const DEFAULT_PROGRESS = (): import('./types').GameProgress => ({
@@ -59,4 +104,11 @@ export const DEFAULT_PROGRESS = (): import('./types').GameProgress => ({
   unlockedLevels: 1,
   unlockedSkins: Array(40).fill(false).map((_, i) => i === 0),
   equippedSkin: 0,
+  dailyStreak: 0,
+  lastDailyReward: 0,
+  unlockedAchievements: [],
+  totalRobotsKilled: 0,
+  totalLevelsCompleted: 0,
+  totalChestsOpened: 0,
+  bestLevelTimes: {},
 });

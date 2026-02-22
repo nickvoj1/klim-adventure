@@ -90,7 +90,26 @@ export interface LevelData {
   platformColor: string;
 }
 
-export type GameScreen = 'menu' | 'skins' | 'worldmap' | 'playing' | 'shop' | 'gameover';
+export interface LevelStats {
+  coinsCollected: number;
+  totalCoins: number;
+  timeTaken: number;
+  robotsKilled: number;
+  wasHit: boolean;
+}
+
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  reward: number;
+  rewardType: 'coins' | 'skin';
+  rewardSkinIndex?: number;
+  check: (progress: GameProgress) => boolean;
+}
+
+export type GameScreen = 'menu' | 'skins' | 'worldmap' | 'playing' | 'shop' | 'gameover' | 'achievements' | 'levelcomplete';
 
 export interface GameProgress {
   totalCoins: number;
@@ -99,4 +118,11 @@ export interface GameProgress {
   unlockedLevels: number;
   unlockedSkins: boolean[];
   equippedSkin: number;
+  dailyStreak: number;
+  lastDailyReward: number;
+  unlockedAchievements: string[];
+  totalRobotsKilled: number;
+  totalLevelsCompleted: number;
+  totalChestsOpened: number;
+  bestLevelTimes: Record<number, number>;
 }

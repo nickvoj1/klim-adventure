@@ -1,11 +1,11 @@
-import { Player, Robot, Bullet, Coin, Chest, Spike, HeartPickup, Flag, Platform, LevelData, Skin } from './types';
+import { Player, Robot, Bullet, Coin, Chest, Spike, HeartPickup, Flag, Platform, LevelData, Skin, LevelStats } from './types';
 import { CANVAS_WIDTH, CANVAS_HEIGHT, GRAVITY, JUMP_FORCE, WALK_SPEED, SPRINT_SPEED, TERMINAL_VELOCITY, SKINS } from './constants';
 import { LEVELS } from './levels';
 import { playSound } from './audio';
 import { drawBackground, drawPlatform, drawPlayer, drawRobot, drawBullet, drawCoin, drawSpike, drawHeart, drawChest, drawFlag } from './renderer';
 
 export interface EngineCallbacks {
-  onLevelComplete: (coinsCollected: number) => void;
+  onLevelComplete: (coinsCollected: number, stats: LevelStats) => void;
   onGameOver: () => void;
   onLivesChange: (lives: number) => void;
   onLevelCoinsChange: (coins: number) => void;
@@ -36,6 +36,9 @@ export class GameEngine {
   private levelData!: LevelData;
   private skin: Skin;
   private tick = 0;
+  private startTime = Date.now();
+  private robotsKilledThisLevel = 0;
+  private wasHitThisLevel = false;
 
   private callbacks: EngineCallbacks;
   public touchState = { left: false, right: false, jump: false, sprint: false };
@@ -64,6 +67,9 @@ export class GameEngine {
     if (!level) return;
     this.levelData = level;
     this.levelCoins = 0;
+    this.startTime = Date.now();
+    this.robotsKilledThisLevel = 0;
+    this.wasHitThisLevel = false;
 
     this.platforms = level.platforms.map(p => ({ ...p }));
     this.coins = level.coins.map((c, i) => ({
@@ -322,7 +328,14 @@ export class GameEngine {
     if (this.aabb(p, this.flag)) {
       this.stop();
       playSound('win');
-      this.callbacks.onLevelComplete(this.levelCoins);
+      const stats: LevelStats = {
+        coinsCollected: this.levelCoins,
+        totalCoins: this.coins.length,
+        timeTaken: (Date.now() - this.startTime) / 1000,
+        robotsKilled: this.robotsKilledThisLevel,
+        wasHit: this.wasHitThisLevel,
+      };
+      this.callbacks.onLevelComplete(this.levelCoins, stats);
       return;
     }
 
@@ -343,6 +356,7 @@ export class GameEngine {
         if (p.vy > 0 && p.y + p.h - r.y < 16) {
           r.alive = false;
           p.vy = -8;
+          this.robotsKilledThisLevel++;
           playSound('stomp');
         } else {
           this.playerHit();
@@ -363,6 +377,7 @@ export class GameEngine {
 
   private playerHit() {
     this.lives--;
+    this.wasHitThisLevel = true;
     this.callbacks.onLivesChange(this.lives);
     playSound('death');
 
