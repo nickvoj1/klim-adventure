@@ -23,7 +23,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    setIsMobile('ontouchstart' in window || navigator.maxTouchPoints > 0);
+    setIsMobile('ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth < 768);
   }, []);
 
   useEffect(() => {
@@ -63,11 +63,11 @@ const GameScreen: React.FC<GameScreenProps> = ({
   }, []);
 
   return (
-    <div className="relative w-full max-w-[800px] select-none">
+    <div className="relative w-full max-w-[800px] select-none flex flex-col">
       {/* Back button */}
       <button
         onClick={onBack}
-        className="absolute top-2 right-2 z-30 px-2 py-1 text-[8px] font-pixel bg-secondary text-secondary-foreground border border-border hover:border-primary"
+        className="absolute top-1 right-1 z-30 px-2 py-1 text-[8px] font-pixel bg-secondary/80 text-secondary-foreground border border-border hover:border-primary"
       >
         ESC
       </button>
@@ -77,33 +77,33 @@ const GameScreen: React.FC<GameScreenProps> = ({
         ref={canvasRef}
         width={800}
         height={400}
-        className="w-full h-auto pixel-border"
+        className="w-full h-auto pixel-border touch-none"
         style={{ imageRendering: 'pixelated' }}
       />
 
-      {/* Touch Controls */}
+      {/* Touch Controls - always show on mobile */}
       {isMobile && (
-        <div className="flex justify-between items-end mt-2 px-2">
-          {/* Left side - D-pad */}
-          <div className="flex gap-2">
+        <div className="flex justify-between items-center mt-3 px-1 pb-2">
+          {/* Left side - D-pad + sprint */}
+          <div className="flex gap-1.5 items-center">
             <button
-              onTouchStart={() => touchStart('left')}
-              onTouchEnd={() => touchEnd('left')}
-              className="w-14 h-14 bg-secondary border-2 border-border text-secondary-foreground font-pixel text-xl active:bg-primary active:text-primary-foreground rounded-sm"
+              onTouchStart={(e) => { e.preventDefault(); touchStart('left'); }}
+              onTouchEnd={(e) => { e.preventDefault(); touchEnd('left'); }}
+              className="w-14 h-14 sm:w-16 sm:h-16 bg-secondary/90 border-2 border-border text-secondary-foreground font-pixel text-2xl active:bg-primary active:text-primary-foreground rounded-lg flex items-center justify-center"
             >
               ◀
             </button>
             <button
-              onTouchStart={() => touchStart('right')}
-              onTouchEnd={() => touchEnd('right')}
-              className="w-14 h-14 bg-secondary border-2 border-border text-secondary-foreground font-pixel text-xl active:bg-primary active:text-primary-foreground rounded-sm"
+              onTouchStart={(e) => { e.preventDefault(); touchStart('right'); }}
+              onTouchEnd={(e) => { e.preventDefault(); touchEnd('right'); }}
+              className="w-14 h-14 sm:w-16 sm:h-16 bg-secondary/90 border-2 border-border text-secondary-foreground font-pixel text-2xl active:bg-primary active:text-primary-foreground rounded-lg flex items-center justify-center"
             >
               ▶
             </button>
             <button
-              onTouchStart={() => touchStart('sprint')}
-              onTouchEnd={() => touchEnd('sprint')}
-              className="w-10 h-14 bg-secondary border-2 border-border text-secondary-foreground font-pixel text-[8px] active:bg-accent active:text-accent-foreground rounded-sm"
+              onTouchStart={(e) => { e.preventDefault(); touchStart('sprint'); }}
+              onTouchEnd={(e) => { e.preventDefault(); touchEnd('sprint'); }}
+              className="w-11 h-14 sm:w-12 sm:h-16 bg-accent/20 border-2 border-accent/50 text-accent font-pixel text-[8px] active:bg-accent active:text-accent-foreground rounded-lg flex items-center justify-center"
             >
               RUN
             </button>
@@ -111,8 +111,8 @@ const GameScreen: React.FC<GameScreenProps> = ({
 
           {/* Right side - Jump */}
           <button
-            onTouchStart={() => touchStart('jump')}
-            className="w-16 h-16 bg-primary border-2 border-primary text-primary-foreground font-pixel text-sm active:scale-95 rounded-sm"
+            onTouchStart={(e) => { e.preventDefault(); touchStart('jump'); }}
+            className="w-20 h-20 sm:w-24 sm:h-24 bg-primary/90 border-3 border-primary text-primary-foreground font-pixel text-xs active:scale-90 rounded-full flex items-center justify-center shadow-lg shadow-primary/30 transition-transform"
           >
             JUMP
           </button>
