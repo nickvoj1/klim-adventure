@@ -53,6 +53,17 @@ const Index = () => {
     if (hoursSince >= 24) {
       setShowDailyReward(true);
     }
+
+    // Check for purchase success from Stripe redirect
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('purchase') === 'success') {
+      const coins = parseInt(params.get('coins') || '0', 10);
+      if (coins > 0) {
+        setProgress(p => ({ ...p, totalCoins: p.totalCoins + coins }));
+      }
+      // Clean URL
+      window.history.replaceState({}, '', window.location.pathname);
+    }
   }, []);
 
   // Check if daily reward is available
