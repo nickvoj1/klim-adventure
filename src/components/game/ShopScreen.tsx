@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { SKINS, DAILY_REWARDS } from '@/game/constants';
+import { SKINS } from '@/game/constants';
 import { playSound } from '@/game/audio';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ShopScreenProps {
   totalCoins: number;
@@ -10,28 +11,45 @@ interface ShopScreenProps {
 }
 
 const COIN_PACKS = [
-  { name: 'Starter Pack', coins: 500, price: '$0.99', icon: '🪙', badge: '' },
-  { name: 'Popular Pack', coins: 1500, price: '$2.99', icon: '💰', badge: 'BEST VALUE' },
-  { name: 'Mega Pack', coins: 5000, price: '$7.99', icon: '💎', badge: '' },
-  { name: 'Ultimate Pack', coins: 15000, price: '$19.99', icon: '👑', badge: 'MOST COINS' },
+  { id: 'starter', name: 'Starter Pack', coins: 500, price: '$0.99', icon: '🪙', badge: '' },
+  { id: 'popular', name: 'Popular Pack', coins: 1500, price: '$2.99', icon: '💰', badge: 'BEST VALUE' },
+  { id: 'mega', name: 'Mega Pack', coins: 5000, price: '$7.99', icon: '💎', badge: '' },
+  { id: 'ultimate', name: 'Ultimate Pack', coins: 15000, price: '$19.99', icon: '👑', badge: 'MOST COINS' },
 ];
 
 type Tab = 'skins' | 'packs' | 'deals';
 
 const ShopScreen: React.FC<ShopScreenProps> = ({ totalCoins, unlockedSkins, onBuy, onBack }) => {
   const [tab, setTab] = useState<Tab>('skins');
+  const [purchasing, setPurchasing] = useState<string | null>(null);
 
   const premiumSkins = SKINS
     .map((skin, i) => ({ ...skin, index: i }))
     .filter(s => s.premium);
 
-  // Daily deal: pseudo-random skin based on day
   const dailyDeal = useMemo(() => {
     const dayIndex = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
     const available = premiumSkins.filter(s => !unlockedSkins[s.index]);
     if (available.length === 0) return null;
     return available[dayIndex % available.length];
   }, [unlockedSkins]);
+
+  const handleBuyPack = async (packId: string) => {
+    setPurchasing(packId);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-coin-checkout', {
+        body: { packId },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (err) {
+      console.error('Checkout error:', err);
+    } finally {
+      setPurchasing(null);
+    }
+  };
 
   const tabs: { key: Tab; label: string }[] = [
     { key: 'skins', label: '🔥 MEME SKINS' },
@@ -107,8 +125,8 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ totalCoins, unlockedSkins, onBu
       {/* Coin Packs Tab */}
       {tab === 'packs' && (
         <div className="grid grid-cols-2 gap-2 sm:gap-3 z-20 mb-3 w-full max-w-[400px]">
-          {COIN_PACKS.map((pack, i) => (
-            <div key={i} className="flex flex-col items-center p-3 sm:p-4 border border-border bg-secondary relative">
+          {COIN_PACKS.map((pack) => (
+            <div key={pack.id} className="flex flex-col items-center p-3 sm:p-4 border border-border bg-secondary relative">
               {pack.badge && (
                 <span className="absolute -top-1 -right-1 px-1.5 py-0.5 text-[5px] sm:text-[6px] font-pixel bg-accent text-accent-foreground animate-wiggle">
                   {pack.badge}
@@ -117,13 +135,21 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ totalCoins, unlockedSkins, onBu
               <span className="text-xl sm:text-2xl mb-1">{pack.icon}</span>
               <span className="text-[7px] sm:text-[8px] font-pixel text-foreground mb-0.5">{pack.name}</span>
               <span className="text-[8px] sm:text-[9px] font-pixel text-accent mb-1">🪙 {pack.coins.toLocaleString()}</span>
-              <button className="px-3 py-1.5 text-[7px] sm:text-[8px] font-pixel bg-muted text-muted-foreground border border-border cursor-not-allowed">
-                {pack.price} — SOON
+              <button
+                onClick={() => handleBuyPack(pack.id)}
+                disabled={purchasing === pack.id}
+                className={`px-3 py-1.5 text-[7px] sm:text-[8px] font-pixel border transition-all ${
+                  purchasing === pack.id
+                    ? 'bg-muted text-muted-foreground border-border cursor-wait'
+                    : 'bg-accent text-accent-foreground border-accent hover:scale-105'
+                }`}
+              >
+                {purchasing === pack.id ? 'LOADING...' : pack.price}
               </button>
             </div>
           ))}
           <p className="col-span-2 text-[6px] sm:text-[7px] font-pixel text-muted-foreground text-center mt-1">
-            💳 Real money purchases coming soon!
+            💳 Powered by Stripe — secure payments
           </p>
         </div>
       )}

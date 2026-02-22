@@ -1,1 +1,4 @@
 project_id = "xwblgdqvzbprahezskfg"
+
+[functions.create-coin-checkout]
+verify_jwt = false
