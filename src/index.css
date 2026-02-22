@@ -97,4 +97,37 @@
       inset 0 0 0 1px hsl(var(--primary) / 0.3),
       0 0 15px hsl(var(--primary) / 0.2);
   }
+  .animate-bounce-slow {
+    animation: bounce-slow 2s ease-in-out infinite;
+  }
+  .animate-wiggle {
+    animation: wiggle 0.6s ease-in-out infinite;
+  }
+  .animate-sparkle {
+    animation: sparkle 1.5s ease-in-out infinite;
+  }
+  .animate-confetti {
+    animation: confetti-fall 3s ease-out forwards;
+  }
+}
+
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  75% { transform: rotate(5deg); }
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.1); }
+}
+
+@keyframes confetti-fall {
+  0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(400px) rotate(720deg); opacity: 0; }
 }

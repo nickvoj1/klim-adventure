@@ -1,12 +1,13 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { GameEngine } from '@/game/engine';
+import { LevelStats } from '@/game/types';
 
 interface GameScreenProps {
   levelIndex: number;
   skinIndex: number;
   lives: number;
   openedChests: Set<string>;
-  onLevelComplete: (coins: number) => void;
+  onLevelComplete: (coins: number, stats: LevelStats) => void;
   onGameOver: () => void;
   onLivesChange: (lives: number) => void;
   onCoinsChange: (coins: number) => void;
