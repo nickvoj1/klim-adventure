@@ -102,7 +102,7 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
+    <div className="flex flex-col items-center justify-center min-h-svh bg-background p-2 sm:p-4 overflow-hidden">
       {screen === 'menu' && (
         <MainMenu
           onPlay={handlePlay}
