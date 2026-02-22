@@ -1,24 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import { playSound } from '@/game/audio';
-import { ACHIEVEMENTS } from '@/game/constants';
 
 interface MainMenuProps {
   onPlay: () => void;
   onShop: () => void;
   onSkins: () => void;
   onAchievements: () => void;
+  onLeaderboard: () => void;
+  onAuth: () => void;
+  onLogout: () => void;
   totalCoins: number;
   hasDailyReward: boolean;
   unclaimedAchievements: number;
+  isLoggedIn: boolean;
+  displayName: string;
 }
 
-const MainMenu: React.FC<MainMenuProps> = ({ onPlay, onShop, onSkins, onAchievements, totalCoins, hasDailyReward, unclaimedAchievements }) => {
+const MainMenu: React.FC<MainMenuProps> = ({
+  onPlay, onShop, onSkins, onAchievements, onLeaderboard, onAuth, onLogout,
+  totalCoins, hasDailyReward, unclaimedAchievements, isLoggedIn, displayName,
+}) => {
   const [selected, setSelected] = useState(0);
   const buttons = [
     { label: '▶ PLAY', action: onPlay, notify: false },
+    { label: '🏆 LEADERBOARD', action: onLeaderboard, notify: false },
     { label: '🎨 SKINS', action: onSkins, notify: false },
     { label: '🛒 SHOP', action: onShop, notify: false },
-    { label: '🏆 BADGES', action: onAchievements, notify: unclaimedAchievements > 0 },
+    { label: '⭐ BADGES', action: onAchievements, notify: unclaimedAchievements > 0 },
   ];
 
   useEffect(() => {
@@ -48,6 +56,28 @@ const MainMenu: React.FC<MainMenuProps> = ({ onPlay, onShop, onSkins, onAchievem
       <div className="absolute bottom-16 right-10 text-xl sm:text-2xl animate-float" style={{ animationDelay: '0.5s' }}>🏜️</div>
       <div className="absolute top-4 right-4 text-base sm:text-lg animate-sparkle">⭐</div>
       <div className="absolute bottom-8 left-1/2 text-lg animate-bounce-slow" style={{ animationDelay: '1s' }}>💀</div>
+
+      {/* Auth status */}
+      <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
+        {isLoggedIn ? (
+          <>
+            <span className="text-[7px] font-pixel text-primary">👤 {displayName}</span>
+            <button
+              onClick={() => { playSound('select'); onLogout(); }}
+              className="text-[6px] font-pixel text-muted-foreground hover:text-destructive transition-colors"
+            >
+              LOGOUT
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => { playSound('select'); onAuth(); }}
+            className="text-[7px] font-pixel text-primary hover:text-accent transition-colors animate-sparkle"
+          >
+            🔑 LOGIN
+          </button>
+        )}
+      </div>
 
       <h1 className="text-xl sm:text-2xl md:text-3xl font-pixel text-primary glow-green mb-1 sm:mb-2 pixel-shadow text-center leading-relaxed z-20">
         PIXEL
