@@ -109,7 +109,7 @@ export interface Achievement {
   check: (progress: GameProgress) => boolean;
 }
 
-export type GameScreen = 'menu' | 'skins' | 'worldmap' | 'playing' | 'shop' | 'gameover' | 'achievements' | 'levelcomplete';
+export type GameScreen = 'menu' | 'skins' | 'worldmap' | 'playing' | 'shop' | 'gameover' | 'achievements' | 'levelcomplete' | 'auth' | 'leaderboard';
 
 export interface GameProgress {
   totalCoins: number;

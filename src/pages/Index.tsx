@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { GameScreen as GameScreenType, GameProgress, LevelStats } from '@/game/types';
 import { DEFAULT_PROGRESS, ACHIEVEMENTS, DAILY_REWARDS } from '@/game/constants';
+import { supabase } from '@/integrations/supabase/client';
 import MainMenu from '@/components/game/MainMenu';
 import GameScreen from '@/components/game/GameScreen';
 import GameOverScreen from '@/components/game/GameOverScreen';
@@ -10,6 +11,9 @@ import ShopScreen from '@/components/game/ShopScreen';
 import AchievementsScreen from '@/components/game/AchievementsScreen';
 import LevelCompleteScreen from '@/components/game/LevelCompleteScreen';
 import DailyReward from '@/components/game/DailyReward';
+import AuthScreen from '@/components/game/AuthScreen';
+import LeaderboardScreen from '@/components/game/LeaderboardScreen';
+import type { Session } from '@supabase/supabase-js';
 
 const STORAGE_KEY = 'pixel-platformer-progress';
 
@@ -18,11 +22,7 @@ function loadProgress(): GameProgress {
     const data = localStorage.getItem(STORAGE_KEY);
     if (data) {
       const parsed = JSON.parse(data);
-      // Migrate old saves
-      return {
-        ...DEFAULT_PROGRESS(),
-        ...parsed,
-      };
+      return { ...DEFAULT_PROGRESS(), ...parsed };
     }
   } catch {}
   return DEFAULT_PROGRESS();
@@ -39,56 +39,92 @@ const Index = () => {
   const [playingLevel, setPlayingLevel] = useState(0);
   const [lastStats, setLastStats] = useState<LevelStats | null>(null);
   const [showDailyReward, setShowDailyReward] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
+  const [displayName, setDisplayName] = useState('');
+
+  // Auth state listener
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, sess) => {
+      setSession(sess);
+      if (sess?.user) {
+        setDisplayName(sess.user.user_metadata?.display_name || 'Player');
+      }
+    });
+    supabase.auth.getSession().then(({ data: { session: sess } }) => {
+      setSession(sess);
+      if (sess?.user) {
+        setDisplayName(sess.user.user_metadata?.display_name || 'Player');
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Persist progress
-  useEffect(() => {
-    saveProgress(progress);
-  }, [progress]);
+  useEffect(() => { saveProgress(progress); }, [progress]);
 
   // Check daily reward on mount
   useEffect(() => {
     const now = Date.now();
     const lastClaim = progress.lastDailyReward || 0;
     const hoursSince = (now - lastClaim) / (1000 * 60 * 60);
-    if (hoursSince >= 24) {
-      setShowDailyReward(true);
-    }
+    if (hoursSince >= 24) setShowDailyReward(true);
 
-    // Check for purchase success from Stripe redirect
     const params = new URLSearchParams(window.location.search);
     if (params.get('purchase') === 'success') {
       const coins = parseInt(params.get('coins') || '0', 10);
-      if (coins > 0) {
-        setProgress(p => ({ ...p, totalCoins: p.totalCoins + coins }));
-      }
-      // Clean URL
+      if (coins > 0) setProgress(p => ({ ...p, totalCoins: p.totalCoins + coins }));
       window.history.replaceState({}, '', window.location.pathname);
     }
   }, []);
 
-  // Check if daily reward is available
   const hasDailyReward = useMemo(() => {
     const now = Date.now();
     const hoursSince = (now - (progress.lastDailyReward || 0)) / (1000 * 60 * 60);
     return hoursSince >= 24;
   }, [progress.lastDailyReward]);
 
-  // Count unclaimed achievements
   const unclaimedAchievements = useMemo(() => {
     return ACHIEVEMENTS.filter(a => a.check(progress) && !progress.unlockedAchievements.includes(a.id)).length;
   }, [progress]);
 
-  // Opened chests tracking
   const openedChests = new Set<string>();
   progress.unlockedSkins.forEach((unlocked, i) => {
-    if (unlocked && i > 0 && i < 30) {
-      openedChests.add(`${i - 1}-${i}`);
-    }
+    if (unlocked && i > 0 && i < 30) openedChests.add(`${i - 1}-${i}`);
   });
 
-  const handlePlay = useCallback(() => {
-    setScreen('worldmap');
-  }, []);
+  // Sync progress to leaderboard after level complete
+  const syncToLeaderboard = useCallback(async (levelIdx: number, stats: LevelStats) => {
+    if (!session?.user) return;
+    try {
+      // Upsert best time
+      const { data: existing } = await supabase
+        .from('leaderboard_entries')
+        .select('best_time')
+        .eq('user_id', session.user.id)
+        .eq('level_index', levelIdx)
+        .maybeSingle();
+
+      if (!existing || stats.timeTaken < Number(existing.best_time)) {
+        await supabase.from('leaderboard_entries').upsert({
+          user_id: session.user.id,
+          level_index: levelIdx,
+          best_time: stats.timeTaken,
+          coins_collected: stats.coinsCollected,
+        }, { onConflict: 'user_id,level_index' });
+      }
+
+      // Update profile stats
+      await supabase.from('profiles').update({
+        total_coins: progress.totalCoins + stats.coinsCollected,
+        total_levels_completed: (progress.totalLevelsCompleted || 0) + 1,
+        total_robots_killed: (progress.totalRobotsKilled || 0) + stats.robotsKilled,
+      }).eq('user_id', session.user.id);
+    } catch (err) {
+      console.error('Leaderboard sync error:', err);
+    }
+  }, [session, progress]);
+
+  const handlePlay = useCallback(() => setScreen('worldmap'), []);
 
   const handleSelectLevel = useCallback((levelIdx: number) => {
     setPlayingLevel(levelIdx);
@@ -105,22 +141,17 @@ const Index = () => {
       newProgress.currentLevel = playingLevel + 1;
       newProgress.totalLevelsCompleted = (p.totalLevelsCompleted || 0) + 1;
       newProgress.totalRobotsKilled = (p.totalRobotsKilled || 0) + stats.robotsKilled;
-      if (playingLevel + 1 >= p.unlockedLevels) {
-        newProgress.unlockedLevels = playingLevel + 2;
-      }
+      if (playingLevel + 1 >= p.unlockedLevels) newProgress.unlockedLevels = playingLevel + 2;
       const bestTimes = { ...(p.bestLevelTimes || {}) };
-      if (!bestTimes[playingLevel] || stats.timeTaken < bestTimes[playingLevel]) {
-        bestTimes[playingLevel] = stats.timeTaken;
-      }
+      if (!bestTimes[playingLevel] || stats.timeTaken < bestTimes[playingLevel]) bestTimes[playingLevel] = stats.timeTaken;
       newProgress.bestLevelTimes = bestTimes;
       return newProgress;
     });
+    syncToLeaderboard(playingLevel, stats);
     setScreen('levelcomplete');
-  }, [playingLevel]);
+  }, [playingLevel, syncToLeaderboard]);
 
-  const handleGameOver = useCallback(() => {
-    setScreen('gameover');
-  }, []);
+  const handleGameOver = useCallback(() => setScreen('gameover'), []);
 
   const handleRetry = useCallback(() => {
     setProgress(p => ({ ...p, lives: 3 }));
@@ -158,15 +189,10 @@ const Index = () => {
       const now = Date.now();
       const hoursSince = (now - (p.lastDailyReward || 0)) / (1000 * 60 * 60);
       let newStreak = hoursSince < 48 ? Math.min((p.dailyStreak || 0) + 1, 7) : 1;
-
       const newProgress = {
-        ...p,
-        totalCoins: p.totalCoins + coins,
-        dailyStreak: newStreak >= 7 ? 0 : newStreak,
-        lastDailyReward: now,
+        ...p, totalCoins: p.totalCoins + coins,
+        dailyStreak: newStreak >= 7 ? 0 : newStreak, lastDailyReward: now,
       };
-
-      // Day 7 bonus: unlock random locked skin
       if (newStreak >= 7) {
         const lockedSkins = p.unlockedSkins.map((u, i) => (!u ? i : -1)).filter(i => i >= 0);
         if (lockedSkins.length > 0) {
@@ -176,7 +202,6 @@ const Index = () => {
           newProgress.unlockedSkins = skins;
         }
       }
-
       return newProgress;
     });
     setShowDailyReward(false);
@@ -184,8 +209,7 @@ const Index = () => {
 
   const handleClaimAchievement = useCallback((achievementId: string, reward: number) => {
     setProgress(p => ({
-      ...p,
-      totalCoins: p.totalCoins + reward,
+      ...p, totalCoins: p.totalCoins + reward,
       unlockedAchievements: [...(p.unlockedAchievements || []), achievementId],
     }));
   }, []);
@@ -195,6 +219,11 @@ const Index = () => {
     setLevelCoins(0);
     setProgress(p => ({ ...p, lives: 3 }));
     setScreen('playing');
+  }, []);
+
+  const handleLogout = useCallback(async () => {
+    await supabase.auth.signOut();
+    setSession(null);
   }, []);
 
   return (
@@ -213,10 +242,26 @@ const Index = () => {
           onShop={() => setScreen('shop')}
           onSkins={() => setScreen('skins')}
           onAchievements={() => setScreen('achievements')}
+          onLeaderboard={() => setScreen('leaderboard')}
+          onAuth={() => setScreen('auth')}
+          onLogout={handleLogout}
           totalCoins={progress.totalCoins}
           hasDailyReward={hasDailyReward}
           unclaimedAchievements={unclaimedAchievements}
+          isLoggedIn={!!session}
+          displayName={displayName}
         />
+      )}
+
+      {screen === 'auth' && (
+        <AuthScreen
+          onBack={() => setScreen('menu')}
+          onAuthSuccess={() => setScreen('menu')}
+        />
+      )}
+
+      {screen === 'leaderboard' && (
+        <LeaderboardScreen onBack={() => setScreen('menu')} />
       )}
 
       {screen === 'worldmap' && (
