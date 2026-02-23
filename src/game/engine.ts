@@ -89,6 +89,18 @@ export class GameEngine {
       skinIndex: c.skinIndex
     }));
     this.spikes = level.spikes.map(s => ({ x: s.x, y: s.y, w: 32, h: 16 }));
+    this.movingSpikes = (level.movingSpikes || []).map(ms => ({
+      x: ms.startX, y: ms.startY, w: 32, h: 16,
+      startX: ms.startX, startY: ms.startY,
+      endX: ms.endX, endY: ms.endY,
+      speed: ms.speed, progress: 0, direction: 1 as const,
+    }));
+    this.bats = (level.bats || []).map(b => ({
+      x: b.x, y: b.y, w: 20, h: 16, baseY: b.y, vx: 1,
+      patrolStart: b.x - b.patrolRange, patrolEnd: b.x + b.patrolRange,
+      alive: true, frame: 0,
+      amplitude: b.amplitude || 30, frequency: b.frequency || 0.03,
+    }));
     this.hearts = level.hearts.map(h => ({ x: h.x, y: h.y, w: 16, h: 16, collected: false }));
     this.flag = { x: level.flagPos.x, y: level.flagPos.y, w: 32, h: 48 };
 
