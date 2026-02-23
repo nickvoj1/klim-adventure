@@ -369,6 +369,30 @@ export class GameEngine {
       }
     }
 
+    // Moving Spikes
+    for (const ms of this.movingSpikes) {
+      if (this.aabb(p, { x: ms.x, y: ms.y - 8, w: ms.w, h: ms.h + 8 })) {
+        this.playerHit();
+        return;
+      }
+    }
+
+    // Bats
+    for (const b of this.bats) {
+      if (!b.alive) continue;
+      if (this.aabb(p, b)) {
+        if (p.vy > 0 && p.y + p.h - b.y < 12) {
+          b.alive = false;
+          p.vy = -8;
+          this.robotsKilledThisLevel++;
+          playSound('stomp');
+        } else {
+          this.playerHit();
+          return;
+        }
+      }
+    }
+
     // Robots
     for (const r of this.robots) {
       if (!r.alive) continue;
@@ -392,6 +416,26 @@ export class GameEngine {
         this.playerHit();
         return;
       }
+    }
+  }
+
+  private updateBats() {
+    for (const b of this.bats) {
+      if (!b.alive) continue;
+      b.x += b.vx;
+      if (b.x <= b.patrolStart || b.x >= b.patrolEnd) b.vx *= -1;
+      b.frame++;
+      b.y = b.baseY + Math.sin(b.frame * b.frequency) * b.amplitude;
+    }
+  }
+
+  private updateMovingSpikes() {
+    for (const ms of this.movingSpikes) {
+      ms.progress += ms.speed * ms.direction;
+      if (ms.progress >= 1) { ms.progress = 1; ms.direction = -1; }
+      if (ms.progress <= 0) { ms.progress = 0; ms.direction = 1; }
+      ms.x = ms.startX + (ms.endX - ms.startX) * ms.progress;
+      ms.y = ms.startY + (ms.endY - ms.startY) * ms.progress;
     }
   }
 
