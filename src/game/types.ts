@@ -1,3 +1,5 @@
+export type AttackType = 'none' | 'punch' | 'kick' | 'special';
+
 export interface Player {
   x: number; y: number;
   vx: number; vy: number;
@@ -9,6 +11,13 @@ export interface Player {
   frame: number;
   frameTimer: number;
   invincible: number;
+  // Combat
+  attacking: AttackType;
+  attackTimer: number;
+  attackCooldown: number;
+  comboCount: number;
+  comboTimer: number;
+  specialCharge: number; // 0-100
 }
 
 export interface Robot {
@@ -164,6 +173,14 @@ export interface Achievement {
   rewardType: 'coins' | 'skin';
   rewardSkinIndex?: number;
   check: (progress: GameProgress) => boolean;
+}
+
+export interface AttackHitbox {
+  x: number; y: number;
+  w: number; h: number;
+  damage: number;
+  knockback: number;
+  type: AttackType;
 }
 
 export type GameScreen = 'menu' | 'skins' | 'worldmap' | 'playing' | 'shop' | 'gameover' | 'achievements' | 'levelcomplete' | 'auth' | 'leaderboard';
