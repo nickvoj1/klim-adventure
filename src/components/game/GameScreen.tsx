@@ -71,9 +71,9 @@ const GameScreen: React.FC<GameScreenProps> = ({
       {/* Back button */}
       <button
         onClick={onBack}
-        className="absolute top-1 right-1 z-30 px-2 py-1 text-[8px] font-pixel bg-secondary/80 text-secondary-foreground border border-border hover:border-primary"
+        className="absolute top-2 right-2 z-30 px-3 py-1.5 text-[10px] font-pixel bg-secondary/90 text-secondary-foreground border-2 border-border hover:border-primary hover:bg-destructive/80 transition-colors"
       >
-        ESC
+        ✕ EXIT
       </button>
 
       {/* Canvas */}
