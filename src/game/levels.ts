@@ -284,6 +284,16 @@ export const LEVELS: LevelData[] = [
       { x: 1910, y: 360 }, { x: 1942, y: 360 },
       { x: 2210, y: 360 }, { x: 2242, y: 360 },
     ],
+    bats: [
+      { x: 450, y: 130, patrolRange: 100, amplitude: 30, frequency: 0.035 },
+      { x: 1100, y: 120, patrolRange: 120, amplitude: 35, frequency: 0.03 },
+      { x: 2000, y: 150, patrolRange: 100, amplitude: 25, frequency: 0.04 },
+    ],
+    movingSpikes: [
+      { startX: 600, startY: 360, endX: 800, endY: 360, speed: 0.007 },
+      { startX: 1500, startY: 360, endX: 1700, endY: 360, speed: 0.006 },
+      { startX: 2100, startY: 280, endX: 2100, endY: 360, speed: 0.005 },
+    ],
     chests: [
       { x: 1260, y: 88, skinIndex: 4 },
     ],
