@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { SKINS } from '@/game/constants';
 import { playSound } from '@/game/audio';
+import SkinAvatar from './SkinAvatar';
 
 interface ChestRouletteProps {
   targetSkinIndex: number;
