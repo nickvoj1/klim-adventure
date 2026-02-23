@@ -47,7 +47,13 @@ export const LEVELS: LevelData[] = [
       { x: 400, y: 344, patrolRange: 100 },
       { x: 1400, y: 344, patrolRange: 120 },
     ],
-    spikes: [],
+    spikes: [
+      { x: 620, y: 360 }, { x: 652, y: 360 },
+    ],
+    bats: [
+      { x: 900, y: 200, patrolRange: 120, amplitude: 25, frequency: 0.025 },
+    ],
+    movingSpikes: [],
     chests: [
       { x: 1520, y: 168, skinIndex: 1 },
     ],
@@ -119,6 +125,13 @@ export const LEVELS: LevelData[] = [
       { x: 1600, y: 360 },
       { x: 1900, y: 360 }, { x: 1932, y: 360 },
     ],
+    bats: [
+      { x: 600, y: 180, patrolRange: 100, amplitude: 30, frequency: 0.03 },
+      { x: 1500, y: 160, patrolRange: 120, amplitude: 25, frequency: 0.035 },
+    ],
+    movingSpikes: [
+      { startX: 1150, startY: 360, endX: 1350, endY: 360, speed: 0.005 },
+    ],
     chests: [
       { x: 1096, y: 68, skinIndex: 2 },
     ],
@@ -186,6 +199,15 @@ export const LEVELS: LevelData[] = [
       { x: 1090, y: 360 }, { x: 1122, y: 360 },
       { x: 1810, y: 360 }, { x: 1842, y: 360 },
       { x: 2160, y: 360 }, { x: 2192, y: 360 },
+    ],
+    bats: [
+      { x: 500, y: 150, patrolRange: 120, amplitude: 35, frequency: 0.03 },
+      { x: 1200, y: 140, patrolRange: 100, amplitude: 30, frequency: 0.035 },
+      { x: 2000, y: 170, patrolRange: 80, amplitude: 25, frequency: 0.04 },
+    ],
+    movingSpikes: [
+      { startX: 800, startY: 360, endX: 1000, endY: 360, speed: 0.006 },
+      { startX: 1800, startY: 360, endX: 1950, endY: 360, speed: 0.007 },
     ],
     chests: [
       { x: 1060, y: 108, skinIndex: 3 },
@@ -261,6 +283,16 @@ export const LEVELS: LevelData[] = [
       { x: 1560, y: 360 },
       { x: 1910, y: 360 }, { x: 1942, y: 360 },
       { x: 2210, y: 360 }, { x: 2242, y: 360 },
+    ],
+    bats: [
+      { x: 450, y: 130, patrolRange: 100, amplitude: 30, frequency: 0.035 },
+      { x: 1100, y: 120, patrolRange: 120, amplitude: 35, frequency: 0.03 },
+      { x: 2000, y: 150, patrolRange: 100, amplitude: 25, frequency: 0.04 },
+    ],
+    movingSpikes: [
+      { startX: 600, startY: 360, endX: 800, endY: 360, speed: 0.007 },
+      { startX: 1500, startY: 360, endX: 1700, endY: 360, speed: 0.006 },
+      { startX: 2100, startY: 280, endX: 2100, endY: 360, speed: 0.005 },
     ],
     chests: [
       { x: 1260, y: 88, skinIndex: 4 },
@@ -344,6 +376,18 @@ export const LEVELS: LevelData[] = [
       { x: 2210, y: 360 }, { x: 2242, y: 360 },
       { x: 2510, y: 360 }, { x: 2542, y: 360 },
     ],
+    bats: [
+      { x: 400, y: 100, patrolRange: 100, amplitude: 35, frequency: 0.035 },
+      { x: 900, y: 90, patrolRange: 120, amplitude: 40, frequency: 0.03 },
+      { x: 1500, y: 110, patrolRange: 100, amplitude: 30, frequency: 0.04 },
+      { x: 2200, y: 120, patrolRange: 80, amplitude: 25, frequency: 0.035 },
+    ],
+    movingSpikes: [
+      { startX: 500, startY: 360, endX: 700, endY: 360, speed: 0.007 },
+      { startX: 1200, startY: 360, endX: 1400, endY: 360, speed: 0.008 },
+      { startX: 1800, startY: 300, endX: 1800, endY: 360, speed: 0.006 },
+      { startX: 2400, startY: 360, endX: 2600, endY: 360, speed: 0.007 },
+    ],
     chests: [
       { x: 1210, y: 68, skinIndex: 5 },
     ],
@@ -401,6 +445,13 @@ export const LEVELS: LevelData[] = [
       { x: 640, y: 360 }, { x: 672, y: 360 },
       { x: 1100, y: 360 },
       { x: 1660, y: 360 }, { x: 1692, y: 360 },
+    ],
+    bats: [
+      { x: 700, y: 180, patrolRange: 120, amplitude: 30, frequency: 0.03 },
+      { x: 1400, y: 160, patrolRange: 100, amplitude: 25, frequency: 0.035 },
+    ],
+    movingSpikes: [
+      { startX: 1100, startY: 360, endX: 1300, endY: 360, speed: 0.005 },
     ],
     chests: [
       { x: 1020, y: 168, skinIndex: 6 },
@@ -539,6 +590,15 @@ export const LEVELS: LevelData[] = [
       { x: 1760, y: 360 }, { x: 1792, y: 360 },
       { x: 2110, y: 360 }, { x: 2142, y: 360 },
     ],
+    bats: [
+      { x: 500, y: 150, patrolRange: 100, amplitude: 30, frequency: 0.035 },
+      { x: 1100, y: 130, patrolRange: 120, amplitude: 35, frequency: 0.03 },
+      { x: 1800, y: 140, patrolRange: 80, amplitude: 25, frequency: 0.04 },
+    ],
+    movingSpikes: [
+      { startX: 800, startY: 360, endX: 1000, endY: 360, speed: 0.006 },
+      { startX: 1600, startY: 360, endX: 1750, endY: 360, speed: 0.007 },
+    ],
     chests: [
       { x: 1030, y: 88, skinIndex: 8 },
     ],
@@ -613,6 +673,17 @@ export const LEVELS: LevelData[] = [
       { x: 1580, y: 360 },
       { x: 1940, y: 360 }, { x: 1972, y: 360 },
       { x: 2240, y: 360 }, { x: 2272, y: 360 },
+    ],
+    bats: [
+      { x: 400, y: 130, patrolRange: 100, amplitude: 35, frequency: 0.035 },
+      { x: 900, y: 110, patrolRange: 120, amplitude: 30, frequency: 0.03 },
+      { x: 1600, y: 120, patrolRange: 100, amplitude: 25, frequency: 0.04 },
+      { x: 2200, y: 140, patrolRange: 80, amplitude: 30, frequency: 0.035 },
+    ],
+    movingSpikes: [
+      { startX: 600, startY: 360, endX: 800, endY: 360, speed: 0.007 },
+      { startX: 1200, startY: 300, endX: 1200, endY: 360, speed: 0.006 },
+      { startX: 1900, startY: 360, endX: 2100, endY: 360, speed: 0.007 },
     ],
     chests: [
       { x: 1840, y: 68, skinIndex: 9 },
@@ -696,6 +767,18 @@ export const LEVELS: LevelData[] = [
       { x: 1880, y: 360 }, { x: 1912, y: 360 },
       { x: 2240, y: 360 }, { x: 2272, y: 360 },
       { x: 2540, y: 360 }, { x: 2572, y: 360 },
+    ],
+    bats: [
+      { x: 350, y: 100, patrolRange: 100, amplitude: 35, frequency: 0.035 },
+      { x: 800, y: 80, patrolRange: 120, amplitude: 40, frequency: 0.03 },
+      { x: 1300, y: 90, patrolRange: 100, amplitude: 30, frequency: 0.04 },
+      { x: 1900, y: 110, patrolRange: 80, amplitude: 35, frequency: 0.035 },
+    ],
+    movingSpikes: [
+      { startX: 500, startY: 360, endX: 700, endY: 360, speed: 0.007 },
+      { startX: 1100, startY: 360, endX: 1300, endY: 360, speed: 0.008 },
+      { startX: 1700, startY: 280, endX: 1700, endY: 360, speed: 0.006 },
+      { startX: 2300, startY: 360, endX: 2500, endY: 360, speed: 0.008 },
     ],
     chests: [
       { x: 2240, y: 48, skinIndex: 10 },

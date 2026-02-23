@@ -47,6 +47,29 @@ export interface Spike {
   w: number; h: number;
 }
 
+export interface MovingSpike {
+  x: number; y: number;
+  w: number; h: number;
+  startX: number; startY: number;
+  endX: number; endY: number;
+  speed: number;
+  progress: number;
+  direction: 1 | -1;
+}
+
+export interface Bat {
+  x: number; y: number;
+  w: number; h: number;
+  baseY: number;
+  vx: number;
+  patrolStart: number;
+  patrolEnd: number;
+  alive: boolean;
+  frame: number;
+  amplitude: number;
+  frequency: number;
+}
+
 export interface HeartPickup {
   x: number; y: number;
   w: number; h: number;
@@ -80,6 +103,8 @@ export interface LevelData {
   coins: { x: number; y: number }[];
   robots: { x: number; y: number; patrolRange: number }[];
   spikes: { x: number; y: number }[];
+  movingSpikes?: { startX: number; startY: number; endX: number; endY: number; speed: number }[];
+  bats?: { x: number; y: number; patrolRange: number; amplitude?: number; frequency?: number }[];
   chests: { x: number; y: number; skinIndex: number }[];
   hearts: { x: number; y: number }[];
   playerSpawn: { x: number; y: number };

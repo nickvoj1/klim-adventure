@@ -1,4 +1,4 @@
-import { Player, Robot, Bullet, Coin, Chest, Spike, HeartPickup, Flag, Platform, LevelData, Skin } from './types';
+import { Player, Robot, Bullet, Coin, Chest, Spike, MovingSpike, Bat, HeartPickup, Flag, Platform, LevelData, Skin } from './types';
 import { CANVAS_WIDTH, CANVAS_HEIGHT } from './constants';
 
 // Utility: pixel-perfect rounded rect
@@ -739,4 +739,122 @@ function drawPixelStar(ctx: CanvasRenderingContext2D, x: number, y: number, size
   ctx.fillRect(x + 1, y - 2, 1, 1);
   ctx.fillRect(x - 2, y + 1, 1, 1);
   ctx.fillRect(x + 1, y + 1, 1, 1);
+}
+
+export function drawMovingSpike(ctx: CanvasRenderingContext2D, ms: MovingSpike, tick: number) {
+  // Warning glow
+  ctx.globalAlpha = 0.15 + Math.sin(tick * 0.1) * 0.1;
+  ctx.fillStyle = '#ff4444';
+  ctx.fillRect(ms.x - 4, ms.y - 12, ms.w + 8, ms.h + 16);
+  ctx.globalAlpha = 1;
+
+  // Base
+  pixelRect(ctx, ms.x, ms.y + 4, ms.w, 4, '#991111');
+
+  for (let i = 0; i < ms.w; i += 16) {
+    // Spike body - purple/red tint to distinguish from static
+    ctx.fillStyle = '#bb2244';
+    ctx.beginPath();
+    ctx.moveTo(ms.x + i, ms.y + 8);
+    ctx.lineTo(ms.x + i + 8, ms.y - 8);
+    ctx.lineTo(ms.x + i + 16, ms.y + 8);
+    ctx.closePath();
+    ctx.fill();
+
+    // Highlight
+    ctx.fillStyle = '#ee4466';
+    ctx.globalAlpha = 0.6;
+    ctx.beginPath();
+    ctx.moveTo(ms.x + i + 2, ms.y + 6);
+    ctx.lineTo(ms.x + i + 7, ms.y - 4);
+    ctx.lineTo(ms.x + i + 8, ms.y + 2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // Tip
+    ctx.fillStyle = '#ffaaaa';
+    ctx.fillRect(ms.x + i + 7, ms.y - 6, 2, 2);
+  }
+}
+
+export function drawBat(ctx: CanvasRenderingContext2D, b: Bat, tick: number) {
+  const wingFlap = Math.sin(b.frame * 0.3) * 8;
+  const facing = b.vx > 0 ? 1 : -1;
+
+  ctx.save();
+  ctx.translate(b.x + b.w / 2, b.y + b.h / 2);
+  ctx.scale(facing, 1);
+
+  // Left wing
+  ctx.fillStyle = '#443355';
+  ctx.beginPath();
+  ctx.moveTo(-4, 0);
+  ctx.lineTo(-14, -4 + wingFlap);
+  ctx.lineTo(-18, 2 + wingFlap * 0.5);
+  ctx.lineTo(-10, 4);
+  ctx.closePath();
+  ctx.fill();
+  // Wing membrane
+  ctx.fillStyle = '#554466';
+  ctx.globalAlpha = 0.6;
+  ctx.beginPath();
+  ctx.moveTo(-4, 2);
+  ctx.lineTo(-12, -2 + wingFlap);
+  ctx.lineTo(-8, 4);
+  ctx.closePath();
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // Right wing
+  ctx.fillStyle = '#443355';
+  ctx.beginPath();
+  ctx.moveTo(4, 0);
+  ctx.lineTo(14, -4 + wingFlap);
+  ctx.lineTo(18, 2 + wingFlap * 0.5);
+  ctx.lineTo(10, 4);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = '#554466';
+  ctx.globalAlpha = 0.6;
+  ctx.beginPath();
+  ctx.moveTo(4, 2);
+  ctx.lineTo(12, -2 + wingFlap);
+  ctx.lineTo(8, 4);
+  ctx.closePath();
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // Body
+  pixelRect(ctx, -5, -4, 10, 10, '#332244');
+  pixelRect(ctx, -4, -3, 8, 3, '#443355');
+
+  // Eyes (red, glowing)
+  const eyeGlow = Math.sin(b.frame * 0.08) > 0;
+  pixelRect(ctx, -4, -2, 3, 2, eyeGlow ? '#ff2200' : '#cc1100');
+  pixelRect(ctx, 1, -2, 3, 2, eyeGlow ? '#ff2200' : '#cc1100');
+  // Eye shine
+  pixelRect(ctx, -3, -2, 1, 1, '#ff6644');
+  pixelRect(ctx, 2, -2, 1, 1, '#ff6644');
+
+  // Fangs
+  pixelRect(ctx, -3, 4, 2, 3, '#ffffff');
+  pixelRect(ctx, 1, 4, 2, 3, '#ffffff');
+
+  // Ears
+  ctx.fillStyle = '#443355';
+  ctx.beginPath();
+  ctx.moveTo(-4, -4);
+  ctx.lineTo(-6, -8);
+  ctx.lineTo(-2, -4);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(4, -4);
+  ctx.lineTo(6, -8);
+  ctx.lineTo(2, -4);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.restore();
 }

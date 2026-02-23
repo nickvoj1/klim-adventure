@@ -1,8 +1,8 @@
-import { Player, Robot, Bullet, Coin, Chest, Spike, HeartPickup, Flag, Platform, LevelData, Skin, LevelStats } from './types';
+import { Player, Robot, Bullet, Coin, Chest, Spike, MovingSpike, Bat, HeartPickup, Flag, Platform, LevelData, Skin, LevelStats } from './types';
 import { CANVAS_WIDTH, CANVAS_HEIGHT, GRAVITY, JUMP_FORCE, WALK_SPEED, SPRINT_SPEED, TERMINAL_VELOCITY, SKINS } from './constants';
 import { LEVELS } from './levels';
 import { playSound } from './audio';
-import { drawBackground, drawPlatform, drawPlayer, drawRobot, drawBullet, drawCoin, drawSpike, drawHeart, drawChest, drawFlag } from './renderer';
+import { drawBackground, drawPlatform, drawPlayer, drawRobot, drawBullet, drawCoin, drawSpike, drawMovingSpike, drawBat, drawHeart, drawChest, drawFlag } from './renderer';
 
 export interface EngineCallbacks {
   onLevelComplete: (coinsCollected: number, stats: LevelStats) => void;
@@ -27,6 +27,8 @@ export class GameEngine {
   private bullets: Bullet[] = [];
   private chests: Chest[] = [];
   private spikes: Spike[] = [];
+  private movingSpikes: MovingSpike[] = [];
+  private bats: Bat[] = [];
   private hearts: HeartPickup[] = [];
   private flag!: Flag;
 
@@ -87,6 +89,18 @@ export class GameEngine {
       skinIndex: c.skinIndex
     }));
     this.spikes = level.spikes.map(s => ({ x: s.x, y: s.y, w: 32, h: 16 }));
+    this.movingSpikes = (level.movingSpikes || []).map(ms => ({
+      x: ms.startX, y: ms.startY, w: 32, h: 16,
+      startX: ms.startX, startY: ms.startY,
+      endX: ms.endX, endY: ms.endY,
+      speed: ms.speed, progress: 0, direction: 1 as const,
+    }));
+    this.bats = (level.bats || []).map(b => ({
+      x: b.x, y: b.y, w: 20, h: 16, baseY: b.y, vx: 1,
+      patrolStart: b.x - b.patrolRange, patrolEnd: b.x + b.patrolRange,
+      alive: true, frame: 0,
+      amplitude: b.amplitude || 30, frequency: b.frequency || 0.03,
+    }));
     this.hearts = level.hearts.map(h => ({ x: h.x, y: h.y, w: 16, h: 16, collected: false }));
     this.flag = { x: level.flagPos.x, y: level.flagPos.y, w: 32, h: 48 };
 
@@ -149,6 +163,8 @@ export class GameEngine {
     }
     this.updatePlayer();
     this.updateRobots();
+    this.updateBats();
+    this.updateMovingSpikes();
     this.updateBullets();
     this.checkCollisions();
     this.updateCamera();
@@ -179,17 +195,21 @@ export class GameEngine {
       p.y -= 16;
     }
 
-    // Jump
+    // Jump - block at borders
+    const atLeftBorder = p.x <= 0;
+    const atRightBorder = p.x >= this.levelData.width - p.w;
     if (this.jumpPressed) {
-      if (p.onGround) {
-        p.vy = JUMP_FORCE;
-        p.onGround = false;
-        p.canDoubleJump = true;
-        playSound('jump');
-      } else if (p.canDoubleJump) {
-        p.vy = JUMP_FORCE;
-        p.canDoubleJump = false;
-        playSound('jump');
+      if (!atLeftBorder && !atRightBorder) {
+        if (p.onGround) {
+          p.vy = JUMP_FORCE;
+          p.onGround = false;
+          p.canDoubleJump = true;
+          playSound('jump');
+        } else if (p.canDoubleJump) {
+          p.vy = JUMP_FORCE;
+          p.canDoubleJump = false;
+          playSound('jump');
+        }
       }
       this.jumpPressed = false;
     }
@@ -349,6 +369,30 @@ export class GameEngine {
       }
     }
 
+    // Moving Spikes
+    for (const ms of this.movingSpikes) {
+      if (this.aabb(p, { x: ms.x, y: ms.y - 8, w: ms.w, h: ms.h + 8 })) {
+        this.playerHit();
+        return;
+      }
+    }
+
+    // Bats
+    for (const b of this.bats) {
+      if (!b.alive) continue;
+      if (this.aabb(p, b)) {
+        if (p.vy > 0 && p.y + p.h - b.y < 12) {
+          b.alive = false;
+          p.vy = -8;
+          this.robotsKilledThisLevel++;
+          playSound('stomp');
+        } else {
+          this.playerHit();
+          return;
+        }
+      }
+    }
+
     // Robots
     for (const r of this.robots) {
       if (!r.alive) continue;
@@ -372,6 +416,26 @@ export class GameEngine {
         this.playerHit();
         return;
       }
+    }
+  }
+
+  private updateBats() {
+    for (const b of this.bats) {
+      if (!b.alive) continue;
+      b.x += b.vx;
+      if (b.x <= b.patrolStart || b.x >= b.patrolEnd) b.vx *= -1;
+      b.frame++;
+      b.y = b.baseY + Math.sin(b.frame * b.frequency) * b.amplitude;
+    }
+  }
+
+  private updateMovingSpikes() {
+    for (const ms of this.movingSpikes) {
+      ms.progress += ms.speed * ms.direction;
+      if (ms.progress >= 1) { ms.progress = 1; ms.direction = -1; }
+      if (ms.progress <= 0) { ms.progress = 0; ms.direction = 1; }
+      ms.x = ms.startX + (ms.endX - ms.startX) * ms.progress;
+      ms.y = ms.startY + (ms.endY - ms.startY) * ms.progress;
     }
   }
 
@@ -433,6 +497,12 @@ export class GameEngine {
 
     // Spikes
     for (const s of this.spikes) drawSpike(ctx, s);
+    // Moving Spikes
+    for (const ms of this.movingSpikes) drawMovingSpike(ctx, ms, this.tick);
+    // Bats
+    for (const b of this.bats) {
+      if (b.alive) drawBat(ctx, b, this.tick);
+    }
 
     // Coins
     for (const c of this.coins) {
