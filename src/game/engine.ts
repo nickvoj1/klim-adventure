@@ -456,6 +456,40 @@ export class GameEngine {
     }
   }
 
+  private updateBoss() {
+    if (!this.boss || !this.boss.alive) return;
+    const b = this.boss;
+    b.frame++;
+    if (b.invincible > 0) b.invincible--;
+
+    // Patrol movement
+    b.x += b.vx * 1.2;
+    if (b.x <= b.patrolStart || b.x >= b.patrolEnd) {
+      b.vx *= -1;
+      b.direction = b.vx > 0 ? 1 : -1;
+    }
+
+    // Attack phases based on HP
+    if (b.hp <= b.maxHp * 0.5 && b.phase === 0) {
+      b.phase = 1; // Enraged
+      b.vx *= 1.5;
+    }
+
+    // Boss-specific shooting
+    b.attackCooldown--;
+    if (b.attackCooldown <= 0) {
+      b.attackCooldown = b.phase === 1 ? 60 : 90;
+      const dir = this.player.x > b.x ? 1 : -1;
+      this.bullets.push({
+        x: b.x + (dir > 0 ? b.w : -8),
+        y: b.y + b.h / 2,
+        vx: dir * 3,
+        w: 10, h: 6
+      });
+      playSound('shoot');
+    }
+  }
+
   private playerHit() {
     this.lives--;
     this.wasHitThisLevel = true;
