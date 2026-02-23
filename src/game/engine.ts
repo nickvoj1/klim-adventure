@@ -44,6 +44,12 @@ export class GameEngine {
   private robotsKilledThisLevel = 0;
   private wasHitThisLevel = false;
 
+  // Screen shake
+  private shakeTimer = 0;
+  private shakeIntensity = 0;
+  // Hit flash
+  private hitFlashTimer = 0;
+
   private callbacks: EngineCallbacks;
   public touchState = { left: false, right: false, jump: false, sprint: false, punch: false, kick: false, special: false };
 
@@ -125,6 +131,7 @@ export class GameEngine {
       vx: 0, vy: 0, w: 20, h: 32,
       onGround: false, canDoubleJump: false, crouching: false,
       facing: 'right', frame: 0, frameTimer: 0, invincible: 0,
+      coyoteTimer: 0, jumpBufferTimer: 0,
       attacking: 'none', attackTimer: 0, attackCooldown: 0,
       comboCount: 0, comboTimer: 0, specialCharge: 0,
     };
@@ -157,6 +164,7 @@ export class GameEngine {
     this.keys.add(e.code);
     if (e.code === 'Space' || e.code === 'KeyW' || e.code === 'ArrowUp') {
       this.jumpPressed = true;
+      this.player.jumpBufferTimer = 8; // Buffer jump for 8 frames
       e.preventDefault();
     }
     // Combat keys
@@ -222,6 +230,7 @@ export class GameEngine {
     // Process touch inputs
     if (this.touchState.jump) {
       this.jumpPressed = true;
+      this.player.jumpBufferTimer = 8;
       this.touchState.jump = false;
     }
     if (this.touchState.punch) { this.triggerAttack('punch'); this.touchState.punch = false; }
@@ -242,15 +251,38 @@ export class GameEngine {
   private updatePlayer() {
     const p = this.player;
     if (p.invincible > 0) p.invincible--;
+    if (this.shakeTimer > 0) this.shakeTimer--;
+    if (this.hitFlashTimer > 0) this.hitFlashTimer--;
+
+    // Coyote timer: counts up when not on ground
+    if (p.onGround) {
+      p.coyoteTimer = 0;
+    } else {
+      p.coyoteTimer++;
+    }
+    // Jump buffer countdown
+    if (p.jumpBufferTimer > 0) p.jumpBufferTimer--;
 
     const sprint = this.keys.has('ShiftLeft') || this.keys.has('ShiftRight') || this.touchState.sprint;
-    const speed = sprint ? SPRINT_SPEED : WALK_SPEED;
+    const targetSpeed = sprint ? SPRINT_SPEED : WALK_SPEED;
     const left = this.keys.has('ArrowLeft') || this.keys.has('KeyA') || this.touchState.left;
     const right = this.keys.has('ArrowRight') || this.keys.has('KeyD') || this.touchState.right;
 
-    if (left) { p.vx = -speed; p.facing = 'left'; }
-    else if (right) { p.vx = speed; p.facing = 'right'; }
-    else p.vx = 0;
+    // Smooth acceleration/deceleration
+    const accel = p.onGround ? 0.6 : 0.35; // Less air control
+    const friction = p.onGround ? 0.75 : 0.92; // More ground friction
+
+    if (left) {
+      p.vx = Math.max(p.vx - accel, -targetSpeed);
+      p.facing = 'left';
+    } else if (right) {
+      p.vx = Math.min(p.vx + accel, targetSpeed);
+      p.facing = 'right';
+    } else {
+      // Apply friction for deceleration
+      p.vx *= friction;
+      if (Math.abs(p.vx) < 0.3) p.vx = 0;
+    }
 
     // Crouch
     const wantCrouch = this.keys.has('ArrowDown') || this.keys.has('KeyS');
@@ -264,23 +296,31 @@ export class GameEngine {
       p.y -= 16;
     }
 
-    // Jump - block at borders
-    const atLeftBorder = p.x <= 0;
-    const atRightBorder = p.x >= this.levelData.width - p.w;
-    if (this.jumpPressed) {
-      if (!atLeftBorder && !atRightBorder) {
-        if (p.onGround) {
-          p.vy = JUMP_FORCE;
-          p.onGround = false;
-          p.canDoubleJump = true;
-          playSound('jump');
-        } else if (p.canDoubleJump) {
-          p.vy = JUMP_FORCE;
-          p.canDoubleJump = false;
-          playSound('jump');
-        }
+    // Jump with coyote time (6 frames) and jump buffer (8 frames)
+    const canCoyoteJump = p.coyoteTimer < 6; // Was recently on ground
+    const wantsJump = this.jumpPressed || p.jumpBufferTimer > 0;
+
+    if (wantsJump) {
+      if (canCoyoteJump && (p.onGround || p.coyoteTimer > 0)) {
+        p.vy = JUMP_FORCE;
+        p.onGround = false;
+        p.canDoubleJump = true;
+        p.coyoteTimer = 99; // Consume coyote time
+        p.jumpBufferTimer = 0;
+        playSound('jump');
+      } else if (p.canDoubleJump) {
+        p.vy = JUMP_FORCE;
+        p.canDoubleJump = false;
+        p.jumpBufferTimer = 0;
+        playSound('jump');
       }
       this.jumpPressed = false;
+    }
+
+    // Variable jump height: cut jump short if key released early
+    const jumpHeld = this.keys.has('Space') || this.keys.has('KeyW') || this.keys.has('ArrowUp');
+    if (!jumpHeld && p.vy < -3) {
+      p.vy *= 0.6; // Cut upward velocity for short hops
     }
 
     // Gravity
@@ -296,7 +336,7 @@ export class GameEngine {
     this.resolveCollisionY();
 
     // Animation
-    if (p.vx !== 0 && p.onGround) {
+    if (Math.abs(p.vx) > 0.5 && p.onGround) {
       p.frameTimer++;
       if (p.frameTimer > 6) { p.frame = (p.frame + 1) % 4; p.frameTimer = 0; }
     } else if (!p.onGround) {
@@ -306,14 +346,13 @@ export class GameEngine {
       p.frameTimer = 0;
     }
 
-    // Fall death
-    if (p.y > CANVAS_HEIGHT + 200) {
+    // Fall death (faster detection)
+    if (p.y > CANVAS_HEIGHT + 80) {
       this.playerDeath();
     }
 
-    // Left boundary
+    // Boundaries (no jump blocking!)
     if (p.x < 0) p.x = 0;
-    // Right boundary
     if (p.x > this.levelData.width - p.w) p.x = this.levelData.width - p.w;
   }
 
@@ -641,6 +680,11 @@ export class GameEngine {
     this.callbacks.onLivesChange(this.lives);
     playSound('death');
 
+    // Screen shake + flash feedback
+    this.shakeTimer = 12;
+    this.shakeIntensity = 6;
+    this.hitFlashTimer = 8;
+
     if (this.lives <= 0) {
       this.stop();
       this.callbacks.onGameOver();
@@ -655,6 +699,11 @@ export class GameEngine {
     this.callbacks.onLivesChange(this.lives);
     playSound('death');
 
+    // Screen shake + flash
+    this.shakeTimer = 16;
+    this.shakeIntensity = 8;
+    this.hitFlashTimer = 12;
+
     if (this.lives <= 0) {
       this.stop();
       this.callbacks.onGameOver();
@@ -668,8 +717,10 @@ export class GameEngine {
   }
 
   private updateCamera() {
-    const targetX = this.player.x - CANVAS_WIDTH / 2 + this.player.w / 2;
-    this.cameraX += (targetX - this.cameraX) * 0.08;
+    // Look-ahead: camera leads in movement direction
+    const lookAhead = this.player.vx * 15;
+    const targetX = this.player.x - CANVAS_WIDTH / 2 + this.player.w / 2 + lookAhead;
+    this.cameraX += (targetX - this.cameraX) * 0.12; // Faster camera follow
     if (this.cameraX < 0) this.cameraX = 0;
     const maxCam = this.levelData.width - CANVAS_WIDTH;
     if (maxCam > 0 && this.cameraX > maxCam) this.cameraX = maxCam;
@@ -679,10 +730,18 @@ export class GameEngine {
     const ctx = this.ctx;
     const cam = this.cameraX;
 
+    // Screen shake offset
+    let shakeX = 0, shakeY = 0;
+    if (this.shakeTimer > 0) {
+      const intensity = this.shakeIntensity * (this.shakeTimer / 12);
+      shakeX = (Math.random() - 0.5) * intensity;
+      shakeY = (Math.random() - 0.5) * intensity;
+    }
+
     drawBackground(ctx, this.levelData, cam, this.tick);
 
     ctx.save();
-    ctx.translate(-Math.round(cam), 0);
+    ctx.translate(-Math.round(cam) + shakeX, shakeY);
 
     // Platforms
     for (const p of this.platforms) {
@@ -738,6 +797,14 @@ export class GameEngine {
     }
 
     ctx.restore();
+
+    // Hit flash overlay (red tint)
+    if (this.hitFlashTimer > 0) {
+      ctx.fillStyle = '#ff0000';
+      ctx.globalAlpha = (this.hitFlashTimer / 12) * 0.25;
+      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+      ctx.globalAlpha = 1;
+    }
 
     // HUD
     this.drawHUD();
@@ -824,54 +891,77 @@ export class GameEngine {
   private drawHUD() {
     const ctx = this.ctx;
 
-    // Hearts
+    // HUD background strip for readability
+    ctx.fillStyle = '#000000';
+    ctx.globalAlpha = 0.35;
+    ctx.fillRect(0, 0, CANVAS_WIDTH, 48);
+    ctx.globalAlpha = 1;
+
+    // Hearts (larger, with outline)
     for (let i = 0; i < this.lives; i++) {
-      ctx.fillStyle = '#ff3366';
-      const hx = 16 + i * 28;
+      const hx = 18 + i * 30;
       const hy = 16;
+      // Shadow
+      ctx.fillStyle = '#000000';
+      ctx.globalAlpha = 0.3;
       ctx.beginPath();
-      ctx.arc(hx, hy, 5, 0, Math.PI * 2);
+      ctx.arc(hx + 1, hy + 1, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      // Heart
+      ctx.fillStyle = '#ff3366';
+      ctx.beginPath();
+      ctx.arc(hx, hy, 6, 0, Math.PI * 2);
       ctx.fill();
       ctx.beginPath();
-      ctx.arc(hx + 6, hy, 5, 0, Math.PI * 2);
+      ctx.arc(hx + 7, hy, 6, 0, Math.PI * 2);
       ctx.fill();
       ctx.beginPath();
-      ctx.moveTo(hx - 5, hy + 2);
-      ctx.lineTo(hx + 3, hy + 10);
-      ctx.lineTo(hx + 11, hy + 2);
+      ctx.moveTo(hx - 6, hy + 2);
+      ctx.lineTo(hx + 3.5, hy + 12);
+      ctx.lineTo(hx + 13, hy + 2);
       ctx.closePath();
       ctx.fill();
+      // Shine
+      ctx.fillStyle = '#ff88aa';
+      ctx.fillRect(hx - 2, hy - 4, 3, 2);
     }
 
-    // Coins
-    ctx.fillStyle = '#ffcc00';
+    // Coins (right side, larger)
+    ctx.fillStyle = '#000000';
+    ctx.globalAlpha = 0.4;
     ctx.font = '12px "Press Start 2P", monospace';
+    ctx.fillText(`🪙 ${this.levelCoins}`, CANVAS_WIDTH - 118, 27);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#ffcc00';
     ctx.fillText(`🪙 ${this.levelCoins}`, CANVAS_WIDTH - 120, 26);
 
-    // Special charge bar
-    const barX = 16;
+    // Special charge bar (wider, with glow when full)
+    const barX = 18;
     const barY = 34;
-    const barW = 80;
-    const barH = 6;
+    const barW = 90;
+    const barH = 8;
     const charge = this.player.specialCharge;
     // Background
+    ctx.fillStyle = '#111122';
+    ctx.fillRect(barX - 1, barY - 1, barW + 2, barH + 2);
     ctx.fillStyle = '#222233';
     ctx.fillRect(barX, barY, barW, barH);
-    // Fill
-    const chargeColor = charge >= 100 ? '#44ddff' : '#2288aa';
-    ctx.fillStyle = chargeColor;
-    ctx.fillRect(barX, barY, barW * (charge / 100), barH);
-    // Border
-    ctx.strokeStyle = '#445566';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(barX, barY, barW, barH);
+    // Fill gradient
+    if (charge > 0) {
+      const barGrad = ctx.createLinearGradient(barX, barY, barX + barW * (charge / 100), barY);
+      barGrad.addColorStop(0, charge >= 100 ? '#22ccff' : '#115577');
+      barGrad.addColorStop(1, charge >= 100 ? '#44eeff' : '#2288aa');
+      ctx.fillStyle = barGrad;
+      ctx.fillRect(barX, barY, barW * (charge / 100), barH);
+    }
     // Label
-    ctx.fillStyle = charge >= 100 ? '#44ddff' : '#667788';
-    ctx.font = '6px "Press Start 2P", monospace';
-    ctx.fillText('SP', barX + barW + 4, barY + 5);
+    ctx.fillStyle = charge >= 100 ? '#44ddff' : '#556677';
+    ctx.font = '7px "Press Start 2P", monospace';
+    ctx.fillText('SP', barX + barW + 5, barY + 7);
     // Flash when ready
     if (charge >= 100 && this.tick % 30 < 15) {
-      ctx.globalAlpha = 0.3;
+      ctx.globalAlpha = 0.35;
       ctx.fillStyle = '#44ddff';
       ctx.fillRect(barX, barY, barW, barH);
       ctx.globalAlpha = 1;
@@ -880,23 +970,33 @@ export class GameEngine {
     // Attack indicator
     if (this.player.attacking !== 'none') {
       ctx.fillStyle = '#ffffff';
-      ctx.font = '8px "Press Start 2P", monospace';
+      ctx.font = '10px "Press Start 2P", monospace';
       const label = this.player.attacking === 'punch' ? '👊' : this.player.attacking === 'kick' ? '🦶' : '⚡';
       ctx.fillText(label, CANVAS_WIDTH / 2 - 8, 36);
     }
 
-    // Level name
+    // Level name (centered, more visible)
+    ctx.fillStyle = '#000000';
+    ctx.globalAlpha = 0.3;
+    ctx.font = '9px "Press Start 2P", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(this.levelData.name, CANVAS_WIDTH / 2 + 1, 19);
+    ctx.globalAlpha = 0.7;
     ctx.fillStyle = '#ffffff';
-    ctx.globalAlpha = 0.5;
-    ctx.font = '8px "Press Start 2P", monospace';
-    ctx.fillText(this.levelData.name, CANVAS_WIDTH / 2 - 60, 18);
+    ctx.fillText(this.levelData.name, CANVAS_WIDTH / 2, 18);
+    ctx.textAlign = 'left';
     ctx.globalAlpha = 1;
 
-    // Controls hint (keyboard)
-    ctx.fillStyle = '#ffffff';
-    ctx.globalAlpha = 0.25;
-    ctx.font = '6px "Press Start 2P", monospace';
-    ctx.fillText('J:Punch K:Kick L:Special', CANVAS_WIDTH - 200, CANVAS_HEIGHT - 8);
-    ctx.globalAlpha = 1;
+    // Controls hint (more visible, fades after 5 seconds)
+    const hintFade = Math.max(0, 1 - (this.tick - 0) / 300); // Fade over ~5 seconds
+    if (hintFade > 0) {
+      ctx.fillStyle = '#ffffff';
+      ctx.globalAlpha = hintFade * 0.5;
+      ctx.font = '7px "Press Start 2P", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('← → Move  SPACE Jump  J Punch  K Kick  L Special', CANVAS_WIDTH / 2, CANVAS_HEIGHT - 10);
+      ctx.textAlign = 'left';
+      ctx.globalAlpha = 1;
+    }
   }
 }

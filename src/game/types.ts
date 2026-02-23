@@ -11,6 +11,9 @@ export interface Player {
   frame: number;
   frameTimer: number;
   invincible: number;
+  // Coyote time & jump buffer
+  coyoteTimer: number;    // frames since last on ground (allow jump within 6)
+  jumpBufferTimer: number; // frames since jump was pressed (execute within 8)
   // Combat
   attacking: AttackType;
   attackTimer: number;
