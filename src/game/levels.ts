@@ -461,6 +461,9 @@ export const LEVELS: LevelData[] = [
     hearts: [
       { x: 820, y: 232 },
     ],
+    playerSpawn: { x: 60, y: 300 },
+    flagPos: { x: 2500, y: 320 },
+  },
   // Level 7 - Vine Crossing (Medium)
   {
     name: 'Vine Crossing',
