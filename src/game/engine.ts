@@ -2,7 +2,7 @@ import { Player, Robot, Bullet, Coin, Chest, Spike, MovingSpike, Bat, HeartPicku
 import { CANVAS_WIDTH, CANVAS_HEIGHT, GRAVITY, JUMP_FORCE, WALK_SPEED, SPRINT_SPEED, TERMINAL_VELOCITY, SKINS } from './constants';
 import { LEVELS } from './levels';
 import { playSound } from './audio';
-import { drawBackground, drawPlatform, drawPlayer, drawRobot, drawBullet, drawCoin, drawSpike, drawHeart, drawChest, drawFlag } from './renderer';
+import { drawBackground, drawPlatform, drawPlayer, drawRobot, drawBullet, drawCoin, drawSpike, drawMovingSpike, drawBat, drawHeart, drawChest, drawFlag } from './renderer';
 
 export interface EngineCallbacks {
   onLevelComplete: (coinsCollected: number, stats: LevelStats) => void;
