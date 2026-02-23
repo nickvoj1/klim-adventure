@@ -125,6 +125,7 @@ export class GameEngine {
       vx: 0, vy: 0, w: 20, h: 32,
       onGround: false, canDoubleJump: false, crouching: false,
       facing: 'right', frame: 0, frameTimer: 0, invincible: 0,
+      coyoteTimer: 0, jumpBufferTimer: 0,
       attacking: 'none', attackTimer: 0, attackCooldown: 0,
       comboCount: 0, comboTimer: 0, specialCharge: 0,
     };
