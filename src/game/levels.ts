@@ -780,6 +780,20 @@ export const LEVELS: LevelData[] = [
       { startX: 1700, startY: 280, endX: 1700, endY: 360, speed: 0.006 },
       { startX: 2300, startY: 360, endX: 2500, endY: 360, speed: 0.008 },
     ],
+    bats: [
+      { x: 300, y: 80, patrolRange: 100, amplitude: 40, frequency: 0.035 },
+      { x: 700, y: 70, patrolRange: 120, amplitude: 35, frequency: 0.03 },
+      { x: 1200, y: 60, patrolRange: 100, amplitude: 30, frequency: 0.04 },
+      { x: 1700, y: 80, patrolRange: 80, amplitude: 35, frequency: 0.035 },
+      { x: 2400, y: 90, patrolRange: 100, amplitude: 30, frequency: 0.04 },
+    ],
+    movingSpikes: [
+      { startX: 400, startY: 360, endX: 600, endY: 360, speed: 0.008 },
+      { startX: 1000, startY: 360, endX: 1200, endY: 360, speed: 0.008 },
+      { startX: 1600, startY: 260, endX: 1600, endY: 360, speed: 0.007 },
+      { startX: 2100, startY: 360, endX: 2350, endY: 360, speed: 0.009 },
+      { startX: 2700, startY: 360, endX: 2900, endY: 360, speed: 0.008 },
+    ],
     chests: [
       { x: 2240, y: 48, skinIndex: 10 },
     ],
