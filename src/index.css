@@ -131,3 +131,42 @@
   0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
   100% { transform: translateY(400px) rotate(720deg); opacity: 0; }
 }
+
+/* Skin rarity animations */
+@keyframes skin-epic-pulse {
+  0%, 100% { filter: drop-shadow(0 0 3px rgba(170,68,238,0.4)); }
+  50% { filter: drop-shadow(0 0 8px rgba(170,68,238,0.7)); }
+}
+
+@keyframes skin-legendary-pulse {
+  0% { filter: drop-shadow(0 0 4px rgba(255,170,0,0.5)); }
+  33% { filter: drop-shadow(0 0 10px rgba(255,170,0,0.8)); }
+  66% { filter: drop-shadow(0 0 6px rgba(255,220,50,0.6)); }
+  100% { filter: drop-shadow(0 0 4px rgba(255,170,0,0.5)); }
+}
+
+@keyframes skin-legendary-ring-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes skin-aura-pulse {
+  0%, 100% { opacity: 0.1; transform: scale(1); }
+  50% { opacity: 0.25; transform: scale(1.05); }
+}
+
+.skin-epic-glow {
+  animation: skin-epic-pulse 2s ease-in-out infinite;
+}
+
+.skin-legendary-glow {
+  animation: skin-legendary-pulse 2.5s ease-in-out infinite;
+}
+
+.skin-legendary-ring {
+  animation: skin-legendary-ring-pulse 2s ease-in-out infinite;
+}
+
+.skin-pulse {
+  animation: skin-aura-pulse 2s ease-in-out infinite;
+}

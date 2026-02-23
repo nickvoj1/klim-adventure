@@ -1,5 +1,5 @@
 import React from 'react';
-import { SKINS } from '@/game/constants';
+import { SKINS, RARITY_COLORS } from '@/game/constants';
 import { playSound } from '@/game/audio';
 import SkinAvatar from './SkinAvatar';
 
@@ -50,9 +50,9 @@ const SkinSelector: React.FC<SkinSelectorProps> = ({ unlockedSkins, equippedSkin
               title={skin.name}
             >
               <SkinAvatar skin={skin} size={unlocked ? 32 : 28} dimmed={!unlocked} />
-              <span className={`font-pixel text-[5px] mt-0.5 text-center leading-tight truncate w-full ${
-                equipped ? 'text-primary' : unlocked ? 'text-foreground/70' : 'text-muted-foreground'
-              }`}>
+              <span className="font-pixel text-[5px] mt-0.5 text-center leading-tight truncate w-full" style={{
+                color: equipped ? undefined : unlocked ? RARITY_COLORS[skin.rarity] : undefined,
+              }}>
                 {skin.name}
               </span>
               {!unlocked && (
