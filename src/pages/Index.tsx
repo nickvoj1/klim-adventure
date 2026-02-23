@@ -237,6 +237,14 @@ const Index = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-svh bg-background p-2 sm:p-4 overflow-hidden">
+      {/* Chest Roulette Overlay */}
+      {chestSkinIndex !== null && (
+        <ChestRoulette
+          targetSkinIndex={chestSkinIndex}
+          onComplete={handleChestRouletteComplete}
+        />
+      )}
+
       {showDailyReward && screen === 'menu' && (
         <DailyReward
           streak={progress.dailyStreak || 0}
