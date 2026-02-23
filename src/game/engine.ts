@@ -165,6 +165,51 @@ export class GameEngine {
     if (e.code === 'KeyL' || e.code === 'KeyC') this.triggerAttack('special');
   };
 
+  private onKeyUp = (e: KeyboardEvent) => {
+    this.keys.delete(e.code);
+  };
+
+  private triggerAttack(type: AttackType) {
+    const p = this.player;
+    if (p.attackCooldown > 0 || p.attacking !== 'none') return;
+    if (type === 'special' && p.specialCharge < 100) return;
+
+    p.attacking = type;
+    p.attackTimer = type === 'special' ? 24 : type === 'kick' ? 16 : 12;
+    p.attackCooldown = type === 'special' ? 60 : 8;
+
+    if (type === 'special') p.specialCharge = 0;
+
+    // Combo tracking
+    if (p.comboTimer > 0) {
+      p.comboCount++;
+    } else {
+      p.comboCount = 1;
+    }
+    p.comboTimer = 30;
+
+    playSound('stomp');
+  }
+
+  private getAttackHitbox(): AttackHitbox | null {
+    const p = this.player;
+    if (p.attacking === 'none' || p.attackTimer <= 0) return null;
+
+    const dir = p.facing === 'right' ? 1 : -1;
+    const baseX = dir === 1 ? p.x + p.w : p.x;
+
+    switch (p.attacking) {
+      case 'punch':
+        return { x: dir === 1 ? baseX : baseX - 18, y: p.y + 6, w: 18, h: 12, damage: 1, knockback: 4, type: 'punch' };
+      case 'kick':
+        return { x: dir === 1 ? baseX : baseX - 24, y: p.y + 14, w: 24, h: 10, damage: 2, knockback: 6, type: 'kick' };
+      case 'special':
+        return { x: p.x - 20, y: p.y - 10, w: p.w + 40, h: p.h + 20, damage: 5, knockback: 10, type: 'special' };
+      default:
+        return null;
+    }
+  }
+
   private loop = () => {
     if (!this.running) return;
     this.update();
@@ -174,12 +219,17 @@ export class GameEngine {
 
   private update() {
     this.tick++;
-    // Process touch jump
+    // Process touch inputs
     if (this.touchState.jump) {
       this.jumpPressed = true;
       this.touchState.jump = false;
     }
+    if (this.touchState.punch) { this.triggerAttack('punch'); this.touchState.punch = false; }
+    if (this.touchState.kick) { this.triggerAttack('kick'); this.touchState.kick = false; }
+    if (this.touchState.special) { this.triggerAttack('special'); this.touchState.special = false; }
+
     this.updatePlayer();
+    this.updateCombat();
     this.updateRobots();
     this.updateBats();
     this.updateMovingSpikes();
