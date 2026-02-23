@@ -30,6 +30,7 @@ export class GameEngine {
   private spikes: Spike[] = [];
   private movingSpikes: MovingSpike[] = [];
   private bats: Bat[] = [];
+  private boss: Boss | null = null;
   private hearts: HeartPickup[] = [];
   private flag!: Flag;
 
