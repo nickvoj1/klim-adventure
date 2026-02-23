@@ -89,12 +89,14 @@ const LevelCompleteScreen: React.FC<LevelCompleteScreenProps> = ({ levelIndex, s
       </div>
 
       <div className="flex flex-col gap-2 z-20 w-full max-w-[280px]">
-        <button
-          onClick={() => { playSound('select'); onNextLevel(); }}
-          className="px-6 py-3 font-pixel text-xs bg-primary text-primary-foreground pixel-border hover:scale-105 transition-transform w-full"
-        >
-          ▶ NEXT LEVEL
-        </button>
+        {levelIndex + 1 < LEVELS.length && (
+          <button
+            onClick={() => { playSound('select'); onNextLevel(); }}
+            className="px-6 py-3 font-pixel text-xs bg-primary text-primary-foreground pixel-border hover:scale-105 transition-transform w-full"
+          >
+            ▶ NEXT LEVEL
+          </button>
+        )}
         <button
           onClick={() => { playSound('select'); onWorldMap(); }}
           className="px-6 py-3 font-pixel text-[9px] sm:text-[10px] bg-secondary text-secondary-foreground border-2 border-border hover:border-primary w-full"
