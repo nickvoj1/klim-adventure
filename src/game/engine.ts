@@ -27,6 +27,8 @@ export class GameEngine {
   private bullets: Bullet[] = [];
   private chests: Chest[] = [];
   private spikes: Spike[] = [];
+  private movingSpikes: MovingSpike[] = [];
+  private bats: Bat[] = [];
   private hearts: HeartPickup[] = [];
   private flag!: Flag;
 
