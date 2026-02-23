@@ -139,6 +139,7 @@ export function generateLevel(levelIndex: number): LevelData {
     bats,
     chests,
     hearts,
+    boss: base.boss,
     flagPos: { x: newWidth - 100, y: 320 },
   };
 }

@@ -1,8 +1,9 @@
-import { Player, Robot, Bullet, Coin, Chest, Spike, MovingSpike, Bat, HeartPickup, Flag, Platform, LevelData, Skin, LevelStats } from './types';
+import { Player, Robot, Bullet, Coin, Chest, Spike, MovingSpike, Bat, Boss, HeartPickup, Flag, Platform, LevelData, Skin, LevelStats } from './types';
 import { CANVAS_WIDTH, CANVAS_HEIGHT, GRAVITY, JUMP_FORCE, WALK_SPEED, SPRINT_SPEED, TERMINAL_VELOCITY, SKINS } from './constants';
 import { generateLevel } from './levelgen';
 import { playSound } from './audio';
 import { drawBackground, drawPlatform, drawPlayer, drawRobot, drawBullet, drawCoin, drawSpike, drawMovingSpike, drawBat, drawHeart, drawChest, drawFlag } from './renderer';
+import { drawBoss, drawBossName } from './boss-renderer';
 
 export interface EngineCallbacks {
   onLevelComplete: (coinsCollected: number, stats: LevelStats) => void;
@@ -29,6 +30,7 @@ export class GameEngine {
   private spikes: Spike[] = [];
   private movingSpikes: MovingSpike[] = [];
   private bats: Bat[] = [];
+  private boss: Boss | null = null;
   private hearts: HeartPickup[] = [];
   private flag!: Flag;
 
@@ -104,6 +106,20 @@ export class GameEngine {
     this.hearts = level.hearts.map(h => ({ x: h.x, y: h.y, w: 16, h: 16, collected: false }));
     this.flag = { x: level.flagPos.x, y: level.flagPos.y, w: 32, h: 48 };
 
+    // Boss
+    if (level.boss) {
+      const bd = level.boss;
+      this.boss = {
+        x: bd.x, y: bd.y, w: 48, h: 48, vx: 1, vy: 0,
+        hp: bd.hp, maxHp: bd.hp, type: bd.type,
+        alive: true, phase: 0, timer: 0, frame: 0, invincible: 0,
+        patrolStart: bd.x - bd.patrolRange, patrolEnd: bd.x + bd.patrolRange,
+        attackCooldown: 120, specialTimer: 0, direction: 1,
+      };
+    } else {
+      this.boss = null;
+    }
+
     this.player = {
       x: level.playerSpawn.x, y: level.playerSpawn.y,
       vx: 0, vy: 0, w: 20, h: 32,
@@ -165,6 +181,7 @@ export class GameEngine {
     this.updateRobots();
     this.updateBats();
     this.updateMovingSpikes();
+    this.updateBoss();
     this.updateBullets();
     this.checkCollisions();
     this.updateCamera();
@@ -409,6 +426,27 @@ export class GameEngine {
       }
     }
 
+    // Boss collision
+    if (this.boss && this.boss.alive && this.boss.invincible <= 0) {
+      if (this.aabb(p, this.boss)) {
+        if (p.vy > 0 && p.y + p.h - this.boss.y < 16) {
+          // Stomp boss
+          this.boss.hp--;
+          this.boss.invincible = 30;
+          p.vy = -10;
+          playSound('stomp');
+          if (this.boss.hp <= 0) {
+            this.boss.alive = false;
+            this.robotsKilledThisLevel++;
+            playSound('stomp');
+          }
+        } else {
+          this.playerHit();
+          return;
+        }
+      }
+    }
+
     // Bullets
     for (let i = this.bullets.length - 1; i >= 0; i--) {
       if (this.aabb(p, this.bullets[i])) {
@@ -436,6 +474,40 @@ export class GameEngine {
       if (ms.progress <= 0) { ms.progress = 0; ms.direction = 1; }
       ms.x = ms.startX + (ms.endX - ms.startX) * ms.progress;
       ms.y = ms.startY + (ms.endY - ms.startY) * ms.progress;
+    }
+  }
+
+  private updateBoss() {
+    if (!this.boss || !this.boss.alive) return;
+    const b = this.boss;
+    b.frame++;
+    if (b.invincible > 0) b.invincible--;
+
+    // Patrol movement
+    b.x += b.vx * 1.2;
+    if (b.x <= b.patrolStart || b.x >= b.patrolEnd) {
+      b.vx *= -1;
+      b.direction = b.vx > 0 ? 1 : -1;
+    }
+
+    // Attack phases based on HP
+    if (b.hp <= b.maxHp * 0.5 && b.phase === 0) {
+      b.phase = 1; // Enraged
+      b.vx *= 1.5;
+    }
+
+    // Boss-specific shooting
+    b.attackCooldown--;
+    if (b.attackCooldown <= 0) {
+      b.attackCooldown = b.phase === 1 ? 60 : 90;
+      const dir = this.player.x > b.x ? 1 : -1;
+      this.bullets.push({
+        x: b.x + (dir > 0 ? b.w : -8),
+        y: b.y + b.h / 2,
+        vx: dir * 3,
+        w: 10, h: 6
+      });
+      playSound('shoot');
     }
   }
 
@@ -524,6 +596,9 @@ export class GameEngine {
     for (const r of this.robots) {
       if (r.alive) drawRobot(ctx, r);
     }
+
+    // Boss
+    if (this.boss) drawBoss(ctx, this.boss, this.tick);
 
     // Bullets
     for (const b of this.bullets) drawBullet(ctx, b);

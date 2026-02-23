@@ -1,4 +1,4 @@
-import { LevelData } from './types';
+import { LevelData, BossData } from './types';
 
 // Helper to create ground segments
 const ground = (x: number, w: number) => ({ x, y: 368, w, h: 32 });
@@ -57,6 +57,7 @@ export const LEVELS: LevelData[] = [
     chests: [
       { x: 1520, y: 168, skinIndex: 1 },
     ],
+    boss: { type: 'sand_worm', x: 2100, y: 320, hp: 3, patrolRange: 120 },
     hearts: [
       { x: 850, y: 232 },
     ],
@@ -135,8 +136,8 @@ export const LEVELS: LevelData[] = [
     chests: [
       { x: 1096, y: 68, skinIndex: 2 },
     ],
+    boss: { type: 'mummy', x: 2500, y: 316, hp: 4, patrolRange: 150 },
     hearts: [
-      { x: 770, y: 172 },
       { x: 2110, y: 232 },
     ],
     playerSpawn: { x: 60, y: 300 },
@@ -212,8 +213,8 @@ export const LEVELS: LevelData[] = [
     chests: [
       { x: 1060, y: 108, skinIndex: 3 },
     ],
+    boss: { type: 'sand_golem', x: 2700, y: 310, hp: 5, patrolRange: 130 },
     hearts: [
-      { x: 570, y: 152 },
       { x: 2120, y: 152 },
     ],
     playerSpawn: { x: 60, y: 300 },
@@ -297,8 +298,8 @@ export const LEVELS: LevelData[] = [
     chests: [
       { x: 1260, y: 88, skinIndex: 4 },
     ],
+    boss: { type: 'scorpion_king', x: 2900, y: 316, hp: 5, patrolRange: 140 },
     hearts: [
-      { x: 520, y: 112 },
       { x: 1820, y: 92 },
     ],
     playerSpawn: { x: 60, y: 240 },
@@ -391,8 +392,8 @@ export const LEVELS: LevelData[] = [
     chests: [
       { x: 1210, y: 68, skinIndex: 5 },
     ],
+    boss: { type: 'pharaoh', x: 3100, y: 300, hp: 6, patrolRange: 150 },
     hearts: [
-      { x: 470, y: 92 },
       { x: 1520, y: 112 },
       { x: 2620, y: 152 },
     ],
@@ -456,6 +457,7 @@ export const LEVELS: LevelData[] = [
     chests: [
       { x: 1020, y: 168, skinIndex: 6 },
     ],
+    boss: { type: 'poison_frog', x: 2300, y: 316, hp: 4, patrolRange: 130 },
     hearts: [
       { x: 820, y: 232 },
     ],
@@ -523,9 +525,8 @@ export const LEVELS: LevelData[] = [
     chests: [
       { x: 1160, y: 128, skinIndex: 7 },
     ],
+    boss: { type: 'spider_queen', x: 2500, y: 310, hp: 5, patrolRange: 140 },
     hearts: [
-      { x: 640, y: 212 },
-      { x: 2120, y: 212 },
     ],
     playerSpawn: { x: 60, y: 300 },
     flagPos: { x: 2700, y: 320 },
@@ -602,9 +603,8 @@ export const LEVELS: LevelData[] = [
     chests: [
       { x: 1030, y: 88, skinIndex: 8 },
     ],
+    boss: { type: 'jungle_hawk', x: 2700, y: 280, hp: 5, patrolRange: 150 },
     hearts: [
-      { x: 560, y: 132 },
-      { x: 2100, y: 132 },
     ],
     playerSpawn: { x: 60, y: 280 },
     flagPos: { x: 2900, y: 320 },
@@ -688,9 +688,8 @@ export const LEVELS: LevelData[] = [
     chests: [
       { x: 1840, y: 68, skinIndex: 9 },
     ],
+    boss: { type: 'stone_guardian', x: 2900, y: 300, hp: 6, patrolRange: 140 },
     hearts: [
-      { x: 520, y: 92 },
-      { x: 1850, y: 72 },
     ],
     playerSpawn: { x: 60, y: 240 },
     flagPos: { x: 3100, y: 320 },
@@ -783,9 +782,8 @@ export const LEVELS: LevelData[] = [
     chests: [
       { x: 2240, y: 48, skinIndex: 10 },
     ],
+    boss: { type: 'ancient_treant', x: 3100, y: 290, hp: 7, patrolRange: 160 },
     hearts: [
-      { x: 480, y: 72 },
-      { x: 1540, y: 112 },
       { x: 2650, y: 132 },
     ],
     playerSpawn: { x: 60, y: 220 },

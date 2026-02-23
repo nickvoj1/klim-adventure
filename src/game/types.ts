@@ -70,6 +70,34 @@ export interface Bat {
   frequency: number;
 }
 
+export type BossType = 'sand_worm' | 'mummy' | 'sand_golem' | 'scorpion_king' | 'pharaoh' | 'poison_frog' | 'spider_queen' | 'jungle_hawk' | 'stone_guardian' | 'ancient_treant';
+
+export interface Boss {
+  x: number; y: number;
+  w: number; h: number;
+  vx: number; vy: number;
+  hp: number; maxHp: number;
+  type: BossType;
+  alive: boolean;
+  phase: number; // attack phase
+  timer: number; // generic timer for attacks
+  frame: number;
+  invincible: number;
+  patrolStart: number;
+  patrolEnd: number;
+  // Boss-specific state
+  attackCooldown: number;
+  specialTimer: number;
+  direction: 1 | -1;
+}
+
+export interface BossData {
+  type: BossType;
+  x: number; y: number;
+  hp: number;
+  patrolRange: number;
+}
+
 export interface HeartPickup {
   x: number; y: number;
   w: number; h: number;
@@ -110,6 +138,7 @@ export interface LevelData {
   bats?: { x: number; y: number; patrolRange: number; amplitude?: number; frequency?: number }[];
   chests: { x: number; y: number; skinIndex: number }[];
   hearts: { x: number; y: number }[];
+  boss?: BossData;
   playerSpawn: { x: number; y: number };
   flagPos: { x: number; y: number };
   width: number;
