@@ -778,9 +778,8 @@ export const LEVELS: LevelData[] = [
     chests: [
       { x: 2240, y: 48, skinIndex: 10 },
     ],
+    boss: { type: 'ancient_treant', x: 3100, y: 290, hp: 7, patrolRange: 160 },
     hearts: [
-      { x: 480, y: 72 },
-      { x: 1540, y: 112 },
       { x: 2650, y: 132 },
     ],
     playerSpawn: { x: 60, y: 220 },
