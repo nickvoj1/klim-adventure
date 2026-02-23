@@ -230,6 +230,7 @@ export class GameEngine {
     // Process touch inputs
     if (this.touchState.jump) {
       this.jumpPressed = true;
+      this.player.jumpBufferTimer = 8;
       this.touchState.jump = false;
     }
     if (this.touchState.punch) { this.triggerAttack('punch'); this.touchState.punch = false; }
