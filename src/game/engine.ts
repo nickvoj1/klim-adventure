@@ -159,10 +159,10 @@ export class GameEngine {
       this.jumpPressed = true;
       e.preventDefault();
     }
-  };
-
-  private onKeyUp = (e: KeyboardEvent) => {
-    this.keys.delete(e.code);
+    // Combat keys
+    if (e.code === 'KeyJ' || e.code === 'KeyZ') this.triggerAttack('punch');
+    if (e.code === 'KeyK' || e.code === 'KeyX') this.triggerAttack('kick');
+    if (e.code === 'KeyL' || e.code === 'KeyC') this.triggerAttack('special');
   };
 
   private loop = () => {
