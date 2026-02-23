@@ -86,6 +86,8 @@ export interface Platform {
   w: number; h: number;
 }
 
+export type SkinRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+
 export interface Skin {
   name: string;
   bodyColor: string;
@@ -94,6 +96,7 @@ export interface Skin {
   pantsColor: string;
   premium: boolean;
   price: number;
+  rarity: SkinRarity;
 }
 
 export interface LevelData {

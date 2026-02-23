@@ -165,20 +165,25 @@ const Index = () => {
     setProgress(p => ({ ...p, lives }));
   }, []);
 
-  const handleChestOpen = useCallback((skinIndex: number) => {
-    setChestSkinIndex(skinIndex);
+  const handleChestOpen = useCallback((_skinIndex: number) => {
+    // skinIndex from level data is ignored; roulette picks randomly
+    setChestSkinIndex(0); // just triggers the roulette overlay
   }, []);
 
-  const handleChestRouletteComplete = useCallback(() => {
-    if (chestSkinIndex !== null) {
-      setProgress(p => {
+  const handleChestRouletteComplete = useCallback((skinIndex: number, isDuplicate: boolean, dupeCoins: number) => {
+    setProgress(p => {
+      const newP = { ...p, totalChestsOpened: (p.totalChestsOpened || 0) + 1 };
+      if (isDuplicate) {
+        newP.totalCoins = p.totalCoins + dupeCoins;
+      } else {
         const skins = [...p.unlockedSkins];
-        skins[chestSkinIndex] = true;
-        return { ...p, unlockedSkins: skins, totalChestsOpened: (p.totalChestsOpened || 0) + 1 };
-      });
-      setChestSkinIndex(null);
-    }
-  }, [chestSkinIndex]);
+        skins[skinIndex] = true;
+        newP.unlockedSkins = skins;
+      }
+      return newP;
+    });
+    setChestSkinIndex(null);
+  }, []);
 
   const handleEquipSkin = useCallback((index: number) => {
     setProgress(p => ({ ...p, equippedSkin: index }));
@@ -240,7 +245,7 @@ const Index = () => {
       {/* Chest Roulette Overlay */}
       {chestSkinIndex !== null && (
         <ChestRoulette
-          targetSkinIndex={chestSkinIndex}
+          unlockedSkins={progress.unlockedSkins}
           onComplete={handleChestRouletteComplete}
         />
       )}
