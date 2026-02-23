@@ -13,6 +13,7 @@ import LevelCompleteScreen from '@/components/game/LevelCompleteScreen';
 import DailyReward from '@/components/game/DailyReward';
 import AuthScreen from '@/components/game/AuthScreen';
 import LeaderboardScreen from '@/components/game/LeaderboardScreen';
+import ChestRoulette from '@/components/game/ChestRoulette';
 import type { Session } from '@supabase/supabase-js';
 
 const STORAGE_KEY = 'pixel-platformer-progress';
