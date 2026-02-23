@@ -743,6 +743,84 @@ export class GameEngine {
     this.drawHUD();
   }
 
+  private drawAttackEffect(ctx: CanvasRenderingContext2D) {
+    const p = this.player;
+    const hitbox = this.getAttackHitbox();
+    if (!hitbox) return;
+
+    const progress = p.attackTimer / (p.attacking === 'special' ? 24 : p.attacking === 'kick' ? 16 : 12);
+
+    if (p.attacking === 'punch') {
+      // Fist effect - quick jab line
+      const dir = p.facing === 'right' ? 1 : -1;
+      const fistX = hitbox.x + (dir === 1 ? hitbox.w * (1 - progress) : hitbox.w * progress);
+      const fistY = hitbox.y + hitbox.h / 2;
+      ctx.fillStyle = '#ffcc44';
+      ctx.globalAlpha = progress;
+      ctx.beginPath();
+      ctx.arc(fistX, fistY, 6 * progress, 0, Math.PI * 2);
+      ctx.fill();
+      // Impact lines
+      for (let i = 0; i < 3; i++) {
+        const angle = (i / 3) * Math.PI - Math.PI / 2;
+        ctx.strokeStyle = '#ffee88';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(fistX + Math.cos(angle) * 4, fistY + Math.sin(angle) * 4);
+        ctx.lineTo(fistX + Math.cos(angle) * (8 + (1 - progress) * 8), fistY + Math.sin(angle) * (8 + (1 - progress) * 8));
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    } else if (p.attacking === 'kick') {
+      // Sweep arc effect
+      const dir = p.facing === 'right' ? 1 : -1;
+      const arcAngle = (1 - progress) * Math.PI;
+      ctx.strokeStyle = '#ff6644';
+      ctx.lineWidth = 3;
+      ctx.globalAlpha = progress;
+      ctx.beginPath();
+      ctx.arc(p.x + p.w / 2, p.y + p.h * 0.6, 20, dir === 1 ? -arcAngle / 2 : Math.PI - arcAngle / 2, dir === 1 ? arcAngle / 2 : Math.PI + arcAngle / 2);
+      ctx.stroke();
+      // Kick trail
+      ctx.fillStyle = '#ff8844';
+      ctx.fillRect(hitbox.x, hitbox.y + hitbox.h / 2 - 1, hitbox.w * (1 - progress), 3);
+      ctx.globalAlpha = 1;
+    } else if (p.attacking === 'special') {
+      // Shockwave ring expanding outward
+      const radius = 30 * (1 - progress);
+      ctx.strokeStyle = '#44ddff';
+      ctx.lineWidth = 4 * progress;
+      ctx.globalAlpha = progress * 0.8;
+      ctx.beginPath();
+      ctx.arc(p.x + p.w / 2, p.y + p.h / 2, radius, 0, Math.PI * 2);
+      ctx.stroke();
+      // Inner glow
+      ctx.fillStyle = '#88eeff';
+      ctx.globalAlpha = progress * 0.3;
+      ctx.beginPath();
+      ctx.arc(p.x + p.w / 2, p.y + p.h / 2, radius * 0.6, 0, Math.PI * 2);
+      ctx.fill();
+      // Sparks
+      for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2 + this.tick * 0.1;
+        const dist = radius * 0.8;
+        ctx.fillStyle = '#ffffff';
+        ctx.globalAlpha = progress * 0.6;
+        ctx.fillRect(p.x + p.w / 2 + Math.cos(angle) * dist - 1, p.y + p.h / 2 + Math.sin(angle) * dist - 1, 3, 3);
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // Combo counter
+    if (p.comboCount > 1 && p.comboTimer > 0) {
+      ctx.fillStyle = '#ffcc00';
+      ctx.font = '10px "Press Start 2P", monospace';
+      ctx.globalAlpha = p.comboTimer / 30;
+      ctx.fillText(`${p.comboCount}x COMBO!`, p.x - 10, p.y - 15);
+      ctx.globalAlpha = 1;
+    }
+  }
+
   private drawHUD() {
     const ctx = this.ctx;
 
@@ -770,11 +848,55 @@ export class GameEngine {
     ctx.font = '12px "Press Start 2P", monospace';
     ctx.fillText(`🪙 ${this.levelCoins}`, CANVAS_WIDTH - 120, 26);
 
+    // Special charge bar
+    const barX = 16;
+    const barY = 34;
+    const barW = 80;
+    const barH = 6;
+    const charge = this.player.specialCharge;
+    // Background
+    ctx.fillStyle = '#222233';
+    ctx.fillRect(barX, barY, barW, barH);
+    // Fill
+    const chargeColor = charge >= 100 ? '#44ddff' : '#2288aa';
+    ctx.fillStyle = chargeColor;
+    ctx.fillRect(barX, barY, barW * (charge / 100), barH);
+    // Border
+    ctx.strokeStyle = '#445566';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(barX, barY, barW, barH);
+    // Label
+    ctx.fillStyle = charge >= 100 ? '#44ddff' : '#667788';
+    ctx.font = '6px "Press Start 2P", monospace';
+    ctx.fillText('SP', barX + barW + 4, barY + 5);
+    // Flash when ready
+    if (charge >= 100 && this.tick % 30 < 15) {
+      ctx.globalAlpha = 0.3;
+      ctx.fillStyle = '#44ddff';
+      ctx.fillRect(barX, barY, barW, barH);
+      ctx.globalAlpha = 1;
+    }
+
+    // Attack indicator
+    if (this.player.attacking !== 'none') {
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '8px "Press Start 2P", monospace';
+      const label = this.player.attacking === 'punch' ? '👊' : this.player.attacking === 'kick' ? '🦶' : '⚡';
+      ctx.fillText(label, CANVAS_WIDTH / 2 - 8, 36);
+    }
+
     // Level name
     ctx.fillStyle = '#ffffff';
     ctx.globalAlpha = 0.5;
     ctx.font = '8px "Press Start 2P", monospace';
     ctx.fillText(this.levelData.name, CANVAS_WIDTH / 2 - 60, 18);
+    ctx.globalAlpha = 1;
+
+    // Controls hint (keyboard)
+    ctx.fillStyle = '#ffffff';
+    ctx.globalAlpha = 0.25;
+    ctx.font = '6px "Press Start 2P", monospace';
+    ctx.fillText('J:Punch K:Kick L:Special', CANVAS_WIDTH - 200, CANVAS_HEIGHT - 8);
     ctx.globalAlpha = 1;
   }
 }

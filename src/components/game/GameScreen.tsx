@@ -113,13 +113,37 @@ const GameScreen: React.FC<GameScreenProps> = ({
             </button>
           </div>
 
-          {/* Right side - Jump */}
-          <button
-            onTouchStart={(e) => { e.preventDefault(); touchStart('jump'); }}
-            className="w-20 h-20 sm:w-24 sm:h-24 bg-primary/90 border-3 border-primary text-primary-foreground font-pixel text-xs active:scale-90 rounded-full flex items-center justify-center shadow-lg shadow-primary/30 transition-transform"
-          >
-            JUMP
-          </button>
+          {/* Right side - Attack buttons + Jump */}
+          <div className="flex gap-1.5 items-center">
+            <div className="flex flex-col gap-1">
+              <button
+                onTouchStart={(e) => { e.preventDefault(); touchStart('punch'); }}
+                className="w-11 h-11 sm:w-12 sm:h-12 bg-yellow-600/80 border-2 border-yellow-500 text-white font-pixel text-[8px] active:bg-yellow-400 rounded-lg flex items-center justify-center"
+              >
+                👊
+              </button>
+              <button
+                onTouchStart={(e) => { e.preventDefault(); touchStart('kick'); }}
+                className="w-11 h-11 sm:w-12 sm:h-12 bg-orange-600/80 border-2 border-orange-500 text-white font-pixel text-[8px] active:bg-orange-400 rounded-lg flex items-center justify-center"
+              >
+                🦶
+              </button>
+            </div>
+            <div className="flex flex-col gap-1 items-center">
+              <button
+                onTouchStart={(e) => { e.preventDefault(); touchStart('special'); }}
+                className="w-12 h-12 sm:w-14 sm:h-14 bg-cyan-600/80 border-2 border-cyan-400 text-white font-pixel text-[8px] active:bg-cyan-400 rounded-lg flex items-center justify-center"
+              >
+                ⚡
+              </button>
+              <button
+                onTouchStart={(e) => { e.preventDefault(); touchStart('jump'); }}
+                className="w-16 h-16 sm:w-20 sm:h-20 bg-primary/90 border-3 border-primary text-primary-foreground font-pixel text-xs active:scale-90 rounded-full flex items-center justify-center shadow-lg shadow-primary/30 transition-transform"
+              >
+                JUMP
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
