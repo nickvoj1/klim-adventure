@@ -106,6 +106,20 @@ export class GameEngine {
     this.hearts = level.hearts.map(h => ({ x: h.x, y: h.y, w: 16, h: 16, collected: false }));
     this.flag = { x: level.flagPos.x, y: level.flagPos.y, w: 32, h: 48 };
 
+    // Boss
+    if (level.boss) {
+      const bd = level.boss;
+      this.boss = {
+        x: bd.x, y: bd.y, w: 48, h: 48, vx: 1, vy: 0,
+        hp: bd.hp, maxHp: bd.hp, type: bd.type,
+        alive: true, phase: 0, timer: 0, frame: 0, invincible: 0,
+        patrolStart: bd.x - bd.patrolRange, patrolEnd: bd.x + bd.patrolRange,
+        attackCooldown: 120, specialTimer: 0, direction: 1,
+      };
+    } else {
+      this.boss = null;
+    }
+
     this.player = {
       x: level.playerSpawn.x, y: level.playerSpawn.y,
       vx: 0, vy: 0, w: 20, h: 32,
