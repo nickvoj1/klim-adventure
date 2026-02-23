@@ -136,8 +136,8 @@ export const LEVELS: LevelData[] = [
     chests: [
       { x: 1096, y: 68, skinIndex: 2 },
     ],
+    boss: { type: 'mummy', x: 2500, y: 316, hp: 4, patrolRange: 150 },
     hearts: [
-      { x: 770, y: 172 },
       { x: 2110, y: 232 },
     ],
     playerSpawn: { x: 60, y: 300 },
