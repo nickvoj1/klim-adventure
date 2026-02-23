@@ -1,4 +1,4 @@
-import { LevelData } from './types';
+import { LevelData, BossData } from './types';
 
 // Helper to create ground segments
 const ground = (x: number, w: number) => ({ x, y: 368, w, h: 32 });
