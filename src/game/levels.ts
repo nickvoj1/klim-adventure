@@ -392,8 +392,8 @@ export const LEVELS: LevelData[] = [
     chests: [
       { x: 1210, y: 68, skinIndex: 5 },
     ],
+    boss: { type: 'pharaoh', x: 3100, y: 300, hp: 6, patrolRange: 150 },
     hearts: [
-      { x: 470, y: 92 },
       { x: 1520, y: 112 },
       { x: 2620, y: 152 },
     ],
