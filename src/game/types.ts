@@ -1,3 +1,5 @@
+export type AttackType = 'none' | 'punch' | 'kick' | 'special';
+
 export interface Player {
   x: number; y: number;
   vx: number; vy: number;
@@ -9,6 +11,13 @@ export interface Player {
   frame: number;
   frameTimer: number;
   invincible: number;
+  // Combat
+  attacking: AttackType;
+  attackTimer: number;
+  attackCooldown: number;
+  comboCount: number;
+  comboTimer: number;
+  specialCharge: number; // 0-100
 }
 
 export interface Robot {
