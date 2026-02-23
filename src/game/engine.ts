@@ -44,6 +44,12 @@ export class GameEngine {
   private robotsKilledThisLevel = 0;
   private wasHitThisLevel = false;
 
+  // Screen shake
+  private shakeTimer = 0;
+  private shakeIntensity = 0;
+  // Hit flash
+  private hitFlashTimer = 0;
+
   private callbacks: EngineCallbacks;
   public touchState = { left: false, right: false, jump: false, sprint: false, punch: false, kick: false, special: false };
 
