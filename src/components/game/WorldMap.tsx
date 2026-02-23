@@ -1,5 +1,5 @@
 import React from 'react';
-import { WORLD_MAP } from '@/game/levels';
+import { WORLD_MAP, LEVELS } from '@/game/levels';
 import { playSound } from '@/game/audio';
 
 interface WorldMapProps {
@@ -28,22 +28,22 @@ const WorldMap: React.FC<WorldMapProps> = ({ unlockedLevels, currentLevel, onSel
                 const levelIdx = lvl - 1;
                 const unlocked = levelIdx < unlockedLevels;
                 const isCurrent = levelIdx === currentLevel;
-                const playable = levelIdx < 2;
+                const hasData = levelIdx < LEVELS.length;
 
                 return (
                   <button
                     key={lvl}
                     onClick={() => {
-                      if (unlocked && playable) {
+                      if (unlocked && hasData) {
                         playSound('select');
                         onSelectLevel(levelIdx);
                       }
                     }}
-                    disabled={!unlocked || !playable}
+                    disabled={!unlocked || !hasData}
                     className={`w-6 h-6 sm:w-7 sm:h-7 font-pixel text-[7px] sm:text-[8px] border transition-all ${
                       isCurrent
                         ? 'bg-primary text-primary-foreground border-primary animate-pulse-glow'
-                        : unlocked && playable
+                        : unlocked && hasData
                         ? 'bg-secondary text-secondary-foreground border-border hover:border-primary hover:scale-110'
                         : 'bg-muted text-muted-foreground border-border opacity-40 cursor-not-allowed'
                     }`}
