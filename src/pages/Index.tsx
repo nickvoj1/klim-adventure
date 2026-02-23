@@ -42,6 +42,7 @@ const Index = () => {
   const [showDailyReward, setShowDailyReward] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [displayName, setDisplayName] = useState('');
+  const [chestSkinIndex, setChestSkinIndex] = useState<number | null>(null);
 
   // Auth state listener
   useEffect(() => {
