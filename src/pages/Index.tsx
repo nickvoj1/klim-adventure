@@ -13,6 +13,7 @@ import LevelCompleteScreen from '@/components/game/LevelCompleteScreen';
 import DailyReward from '@/components/game/DailyReward';
 import AuthScreen from '@/components/game/AuthScreen';
 import LeaderboardScreen from '@/components/game/LeaderboardScreen';
+import ChestRoulette from '@/components/game/ChestRoulette';
 import type { Session } from '@supabase/supabase-js';
 
 const STORAGE_KEY = 'pixel-platformer-progress';
@@ -41,6 +42,7 @@ const Index = () => {
   const [showDailyReward, setShowDailyReward] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [displayName, setDisplayName] = useState('');
+  const [chestSkinIndex, setChestSkinIndex] = useState<number | null>(null);
 
   // Auth state listener
   useEffect(() => {
@@ -164,12 +166,19 @@ const Index = () => {
   }, []);
 
   const handleChestOpen = useCallback((skinIndex: number) => {
-    setProgress(p => {
-      const skins = [...p.unlockedSkins];
-      skins[skinIndex] = true;
-      return { ...p, unlockedSkins: skins, totalChestsOpened: (p.totalChestsOpened || 0) + 1 };
-    });
+    setChestSkinIndex(skinIndex);
   }, []);
+
+  const handleChestRouletteComplete = useCallback(() => {
+    if (chestSkinIndex !== null) {
+      setProgress(p => {
+        const skins = [...p.unlockedSkins];
+        skins[chestSkinIndex] = true;
+        return { ...p, unlockedSkins: skins, totalChestsOpened: (p.totalChestsOpened || 0) + 1 };
+      });
+      setChestSkinIndex(null);
+    }
+  }, [chestSkinIndex]);
 
   const handleEquipSkin = useCallback((index: number) => {
     setProgress(p => ({ ...p, equippedSkin: index }));
@@ -228,6 +237,14 @@ const Index = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-svh bg-background p-2 sm:p-4 overflow-hidden">
+      {/* Chest Roulette Overlay */}
+      {chestSkinIndex !== null && (
+        <ChestRoulette
+          targetSkinIndex={chestSkinIndex}
+          onComplete={handleChestRouletteComplete}
+        />
+      )}
+
       {showDailyReward && screen === 'menu' && (
         <DailyReward
           streak={progress.dailyStreak || 0}
