@@ -166,12 +166,19 @@ const Index = () => {
   }, []);
 
   const handleChestOpen = useCallback((skinIndex: number) => {
-    setProgress(p => {
-      const skins = [...p.unlockedSkins];
-      skins[skinIndex] = true;
-      return { ...p, unlockedSkins: skins, totalChestsOpened: (p.totalChestsOpened || 0) + 1 };
-    });
+    setChestSkinIndex(skinIndex);
   }, []);
+
+  const handleChestRouletteComplete = useCallback(() => {
+    if (chestSkinIndex !== null) {
+      setProgress(p => {
+        const skins = [...p.unlockedSkins];
+        skins[chestSkinIndex] = true;
+        return { ...p, unlockedSkins: skins, totalChestsOpened: (p.totalChestsOpened || 0) + 1 };
+      });
+      setChestSkinIndex(null);
+    }
+  }, [chestSkinIndex]);
 
   const handleEquipSkin = useCallback((index: number) => {
     setProgress(p => ({ ...p, equippedSkin: index }));
