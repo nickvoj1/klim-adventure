@@ -245,7 +245,7 @@ const Index = () => {
       {/* Chest Roulette Overlay */}
       {chestSkinIndex !== null && (
         <ChestRoulette
-          targetSkinIndex={chestSkinIndex}
+          unlockedSkins={progress.unlockedSkins}
           onComplete={handleChestRouletteComplete}
         />
       )}

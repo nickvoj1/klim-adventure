@@ -65,7 +65,7 @@ export class GameEngine {
   }
 
   private loadLevel(index: number, openedChests: Set<string>) {
-    const level = LEVELS[index];
+    const level = generateLevel(index);
     if (!level) return;
     this.levelData = level;
     this.levelCoins = 0;
