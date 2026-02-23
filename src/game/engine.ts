@@ -597,6 +597,9 @@ export class GameEngine {
       if (r.alive) drawRobot(ctx, r);
     }
 
+    // Boss
+    if (this.boss) drawBoss(ctx, this.boss, this.tick);
+
     // Bullets
     for (const b of this.bullets) drawBullet(ctx, b);
 
