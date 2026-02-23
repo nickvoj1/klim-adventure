@@ -426,6 +426,27 @@ export class GameEngine {
       }
     }
 
+    // Boss collision
+    if (this.boss && this.boss.alive && this.boss.invincible <= 0) {
+      if (this.aabb(p, this.boss)) {
+        if (p.vy > 0 && p.y + p.h - this.boss.y < 16) {
+          // Stomp boss
+          this.boss.hp--;
+          this.boss.invincible = 30;
+          p.vy = -10;
+          playSound('stomp');
+          if (this.boss.hp <= 0) {
+            this.boss.alive = false;
+            this.robotsKilledThisLevel++;
+            playSound('stomp');
+          }
+        } else {
+          this.playerHit();
+          return;
+        }
+      }
+    }
+
     // Bullets
     for (let i = this.bullets.length - 1; i >= 0; i--) {
       if (this.aabb(p, this.bullets[i])) {
