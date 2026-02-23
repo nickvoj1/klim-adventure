@@ -680,6 +680,11 @@ export class GameEngine {
     this.callbacks.onLivesChange(this.lives);
     playSound('death');
 
+    // Screen shake + flash feedback
+    this.shakeTimer = 12;
+    this.shakeIntensity = 6;
+    this.hitFlashTimer = 8;
+
     if (this.lives <= 0) {
       this.stop();
       this.callbacks.onGameOver();
@@ -694,6 +699,11 @@ export class GameEngine {
     this.callbacks.onLivesChange(this.lives);
     playSound('death');
 
+    // Screen shake + flash
+    this.shakeTimer = 16;
+    this.shakeIntensity = 8;
+    this.hitFlashTimer = 12;
+
     if (this.lives <= 0) {
       this.stop();
       this.callbacks.onGameOver();
@@ -707,8 +717,10 @@ export class GameEngine {
   }
 
   private updateCamera() {
-    const targetX = this.player.x - CANVAS_WIDTH / 2 + this.player.w / 2;
-    this.cameraX += (targetX - this.cameraX) * 0.08;
+    // Look-ahead: camera leads in movement direction
+    const lookAhead = this.player.vx * 15;
+    const targetX = this.player.x - CANVAS_WIDTH / 2 + this.player.w / 2 + lookAhead;
+    this.cameraX += (targetX - this.cameraX) * 0.12; // Faster camera follow
     if (this.cameraX < 0) this.cameraX = 0;
     const maxCam = this.levelData.width - CANVAS_WIDTH;
     if (maxCam > 0 && this.cameraX > maxCam) this.cameraX = maxCam;
