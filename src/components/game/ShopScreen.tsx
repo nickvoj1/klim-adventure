@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { SKINS } from '@/game/constants';
 import { playSound } from '@/game/audio';
 import { supabase } from '@/integrations/supabase/client';
+import SkinAvatar from './SkinAvatar';
 
 interface ShopScreenProps {
   totalCoins: number;
