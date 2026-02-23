@@ -732,6 +732,11 @@ export class GameEngine {
       drawPlayer(ctx, this.player, this.skin);
     }
 
+    // Attack effects
+    if (this.player.attacking !== 'none' && this.player.attackTimer > 0) {
+      this.drawAttackEffect(ctx);
+    }
+
     ctx.restore();
 
     // HUD
