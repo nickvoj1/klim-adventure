@@ -730,10 +730,18 @@ export class GameEngine {
     const ctx = this.ctx;
     const cam = this.cameraX;
 
+    // Screen shake offset
+    let shakeX = 0, shakeY = 0;
+    if (this.shakeTimer > 0) {
+      const intensity = this.shakeIntensity * (this.shakeTimer / 12);
+      shakeX = (Math.random() - 0.5) * intensity;
+      shakeY = (Math.random() - 0.5) * intensity;
+    }
+
     drawBackground(ctx, this.levelData, cam, this.tick);
 
     ctx.save();
-    ctx.translate(-Math.round(cam), 0);
+    ctx.translate(-Math.round(cam) + shakeX, shakeY);
 
     // Platforms
     for (const p of this.platforms) {
@@ -789,6 +797,14 @@ export class GameEngine {
     }
 
     ctx.restore();
+
+    // Hit flash overlay (red tint)
+    if (this.hitFlashTimer > 0) {
+      ctx.fillStyle = '#ff0000';
+      ctx.globalAlpha = (this.hitFlashTimer / 12) * 0.25;
+      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+      ctx.globalAlpha = 1;
+    }
 
     // HUD
     this.drawHUD();
