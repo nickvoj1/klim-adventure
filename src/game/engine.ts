@@ -45,7 +45,7 @@ export class GameEngine {
   private wasHitThisLevel = false;
 
   private callbacks: EngineCallbacks;
-  public touchState = { left: false, right: false, jump: false, sprint: false };
+  public touchState = { left: false, right: false, jump: false, sprint: false, punch: false, kick: false, special: false };
 
   constructor(
     canvas: HTMLCanvasElement,
