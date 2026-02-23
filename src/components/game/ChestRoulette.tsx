@@ -173,30 +173,4 @@ const ChestRoulette: React.FC<ChestRouletteProps> = ({ targetSkinIndex, onComple
   );
 };
 
-// Mini pixel character preview
-const SkinPreview: React.FC<{ skin: typeof SKINS[0] }> = ({ skin }) => (
-  <div className="relative" style={{ width: 24, height: 40 }}>
-    <svg width="24" height="40" viewBox="0 0 20 34" style={{ imageRendering: 'pixelated' }}>
-      {/* Hair */}
-      <rect x="3" y="0" width="12" height="4" fill={skin.hairColor} />
-      {/* Head */}
-      <rect x="3" y="4" width="12" height="7" fill={skin.headColor} />
-      {/* Eyes */}
-      <rect x="10" y="6" width="3" height="2" fill="white" />
-      <rect x="11" y="6" width="2" height="2" fill="#111" />
-      {/* Body */}
-      <rect x="2" y="11" width="14" height="7" fill={skin.bodyColor} />
-      {/* Arms */}
-      <rect x="0" y="12" width="3" height="6" fill={skin.bodyColor} />
-      <rect x="15" y="12" width="3" height="6" fill={skin.bodyColor} />
-      {/* Pants */}
-      <rect x="3" y="18" width="5" height="5" fill={skin.pantsColor} />
-      <rect x="10" y="18" width="5" height="5" fill={skin.pantsColor} />
-      {/* Feet */}
-      <rect x="2" y="23" width="6" height="4" fill="#3a2211" />
-      <rect x="10" y="23" width="6" height="4" fill="#3a2211" />
-    </svg>
-  </div>
-);
-
 export default ChestRoulette;
