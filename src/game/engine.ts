@@ -891,54 +891,77 @@ export class GameEngine {
   private drawHUD() {
     const ctx = this.ctx;
 
-    // Hearts
+    // HUD background strip for readability
+    ctx.fillStyle = '#000000';
+    ctx.globalAlpha = 0.35;
+    ctx.fillRect(0, 0, CANVAS_WIDTH, 48);
+    ctx.globalAlpha = 1;
+
+    // Hearts (larger, with outline)
     for (let i = 0; i < this.lives; i++) {
-      ctx.fillStyle = '#ff3366';
-      const hx = 16 + i * 28;
+      const hx = 18 + i * 30;
       const hy = 16;
+      // Shadow
+      ctx.fillStyle = '#000000';
+      ctx.globalAlpha = 0.3;
       ctx.beginPath();
-      ctx.arc(hx, hy, 5, 0, Math.PI * 2);
+      ctx.arc(hx + 1, hy + 1, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      // Heart
+      ctx.fillStyle = '#ff3366';
+      ctx.beginPath();
+      ctx.arc(hx, hy, 6, 0, Math.PI * 2);
       ctx.fill();
       ctx.beginPath();
-      ctx.arc(hx + 6, hy, 5, 0, Math.PI * 2);
+      ctx.arc(hx + 7, hy, 6, 0, Math.PI * 2);
       ctx.fill();
       ctx.beginPath();
-      ctx.moveTo(hx - 5, hy + 2);
-      ctx.lineTo(hx + 3, hy + 10);
-      ctx.lineTo(hx + 11, hy + 2);
+      ctx.moveTo(hx - 6, hy + 2);
+      ctx.lineTo(hx + 3.5, hy + 12);
+      ctx.lineTo(hx + 13, hy + 2);
       ctx.closePath();
       ctx.fill();
+      // Shine
+      ctx.fillStyle = '#ff88aa';
+      ctx.fillRect(hx - 2, hy - 4, 3, 2);
     }
 
-    // Coins
-    ctx.fillStyle = '#ffcc00';
+    // Coins (right side, larger)
+    ctx.fillStyle = '#000000';
+    ctx.globalAlpha = 0.4;
     ctx.font = '12px "Press Start 2P", monospace';
+    ctx.fillText(`🪙 ${this.levelCoins}`, CANVAS_WIDTH - 118, 27);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#ffcc00';
     ctx.fillText(`🪙 ${this.levelCoins}`, CANVAS_WIDTH - 120, 26);
 
-    // Special charge bar
-    const barX = 16;
+    // Special charge bar (wider, with glow when full)
+    const barX = 18;
     const barY = 34;
-    const barW = 80;
-    const barH = 6;
+    const barW = 90;
+    const barH = 8;
     const charge = this.player.specialCharge;
     // Background
+    ctx.fillStyle = '#111122';
+    ctx.fillRect(barX - 1, barY - 1, barW + 2, barH + 2);
     ctx.fillStyle = '#222233';
     ctx.fillRect(barX, barY, barW, barH);
-    // Fill
-    const chargeColor = charge >= 100 ? '#44ddff' : '#2288aa';
-    ctx.fillStyle = chargeColor;
-    ctx.fillRect(barX, barY, barW * (charge / 100), barH);
-    // Border
-    ctx.strokeStyle = '#445566';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(barX, barY, barW, barH);
+    // Fill gradient
+    if (charge > 0) {
+      const barGrad = ctx.createLinearGradient(barX, barY, barX + barW * (charge / 100), barY);
+      barGrad.addColorStop(0, charge >= 100 ? '#22ccff' : '#115577');
+      barGrad.addColorStop(1, charge >= 100 ? '#44eeff' : '#2288aa');
+      ctx.fillStyle = barGrad;
+      ctx.fillRect(barX, barY, barW * (charge / 100), barH);
+    }
     // Label
-    ctx.fillStyle = charge >= 100 ? '#44ddff' : '#667788';
-    ctx.font = '6px "Press Start 2P", monospace';
-    ctx.fillText('SP', barX + barW + 4, barY + 5);
+    ctx.fillStyle = charge >= 100 ? '#44ddff' : '#556677';
+    ctx.font = '7px "Press Start 2P", monospace';
+    ctx.fillText('SP', barX + barW + 5, barY + 7);
     // Flash when ready
     if (charge >= 100 && this.tick % 30 < 15) {
-      ctx.globalAlpha = 0.3;
+      ctx.globalAlpha = 0.35;
       ctx.fillStyle = '#44ddff';
       ctx.fillRect(barX, barY, barW, barH);
       ctx.globalAlpha = 1;
@@ -947,23 +970,33 @@ export class GameEngine {
     // Attack indicator
     if (this.player.attacking !== 'none') {
       ctx.fillStyle = '#ffffff';
-      ctx.font = '8px "Press Start 2P", monospace';
+      ctx.font = '10px "Press Start 2P", monospace';
       const label = this.player.attacking === 'punch' ? '👊' : this.player.attacking === 'kick' ? '🦶' : '⚡';
       ctx.fillText(label, CANVAS_WIDTH / 2 - 8, 36);
     }
 
-    // Level name
+    // Level name (centered, more visible)
+    ctx.fillStyle = '#000000';
+    ctx.globalAlpha = 0.3;
+    ctx.font = '9px "Press Start 2P", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(this.levelData.name, CANVAS_WIDTH / 2 + 1, 19);
+    ctx.globalAlpha = 0.7;
     ctx.fillStyle = '#ffffff';
-    ctx.globalAlpha = 0.5;
-    ctx.font = '8px "Press Start 2P", monospace';
-    ctx.fillText(this.levelData.name, CANVAS_WIDTH / 2 - 60, 18);
+    ctx.fillText(this.levelData.name, CANVAS_WIDTH / 2, 18);
+    ctx.textAlign = 'left';
     ctx.globalAlpha = 1;
 
-    // Controls hint (keyboard)
-    ctx.fillStyle = '#ffffff';
-    ctx.globalAlpha = 0.25;
-    ctx.font = '6px "Press Start 2P", monospace';
-    ctx.fillText('J:Punch K:Kick L:Special', CANVAS_WIDTH - 200, CANVAS_HEIGHT - 8);
-    ctx.globalAlpha = 1;
+    // Controls hint (more visible, fades after 5 seconds)
+    const hintFade = Math.max(0, 1 - (this.tick - 0) / 300); // Fade over ~5 seconds
+    if (hintFade > 0) {
+      ctx.fillStyle = '#ffffff';
+      ctx.globalAlpha = hintFade * 0.5;
+      ctx.font = '7px "Press Start 2P", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('← → Move  SPACE Jump  J Punch  K Kick  L Special', CANVAS_WIDTH / 2, CANVAS_HEIGHT - 10);
+      ctx.textAlign = 'left';
+      ctx.globalAlpha = 1;
+    }
   }
 }
