@@ -1,5 +1,5 @@
 import React from 'react';
-import { SKINS } from '@/game/constants';
+import { SKINS, RARITY_COLORS } from '@/game/constants';
 import { playSound } from '@/game/audio';
 import SkinAvatar from './SkinAvatar';
 
