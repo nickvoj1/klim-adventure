@@ -164,6 +164,7 @@ export class GameEngine {
     this.keys.add(e.code);
     if (e.code === 'Space' || e.code === 'KeyW' || e.code === 'ArrowUp') {
       this.jumpPressed = true;
+      this.player.jumpBufferTimer = 8; // Buffer jump for 8 frames
       e.preventDefault();
     }
     // Combat keys
