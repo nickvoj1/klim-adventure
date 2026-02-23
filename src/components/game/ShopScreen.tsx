@@ -158,11 +158,8 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ totalCoins, unlockedSkins, onBu
           {dailyDeal ? (
             <div className="flex flex-col items-center p-4 sm:p-6 border-2 border-accent bg-accent/5 w-full animate-pulse-glow">
               <span className="text-[7px] font-pixel text-accent mb-2 animate-sparkle">⚡ TODAY ONLY — 50% OFF!</span>
-              <div className="flex flex-col items-center mb-2">
-                <div className="w-5 h-2" style={{ backgroundColor: dailyDeal.hairColor }} />
-                <div className="w-5 h-4" style={{ backgroundColor: dailyDeal.headColor }} />
-                <div className="w-6 h-4" style={{ backgroundColor: dailyDeal.bodyColor }} />
-                <div className="w-6 h-4" style={{ backgroundColor: dailyDeal.pantsColor }} />
+              <div className="mb-2">
+                <SkinAvatar skin={dailyDeal} size={48} animated />
               </div>
               <span className="text-[8px] sm:text-[10px] font-pixel text-foreground mb-1">{dailyDeal.name}</span>
               <div className="flex items-center gap-2 mb-2">
