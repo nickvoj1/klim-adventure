@@ -54,6 +54,9 @@ const GameScreen: React.FC<GameScreenProps> = ({
     if (dir === 'right') engineRef.current.touchState.right = true;
     if (dir === 'jump') engineRef.current.touchState.jump = true;
     if (dir === 'sprint') engineRef.current.touchState.sprint = true;
+    if (dir === 'punch') engineRef.current.touchState.punch = true;
+    if (dir === 'kick') engineRef.current.touchState.kick = true;
+    if (dir === 'special') engineRef.current.touchState.special = true;
   }, []);
 
   const touchEnd = useCallback((dir: string) => {
