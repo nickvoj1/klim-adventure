@@ -345,6 +345,78 @@ export class GameEngine {
     }
   }
 
+  private updateCombat() {
+    const p = this.player;
+    if (p.attackCooldown > 0) p.attackCooldown--;
+    if (p.comboTimer > 0) p.comboTimer--;
+    else p.comboCount = 0;
+
+    // Build special charge from kills and hits
+    if (p.specialCharge < 100) {
+      // Passive charge
+      if (this.tick % 60 === 0) p.specialCharge = Math.min(100, p.specialCharge + 1);
+    }
+
+    if (p.attacking !== 'none') {
+      p.attackTimer--;
+      if (p.attackTimer <= 0) {
+        p.attacking = 'none';
+      } else {
+        // Check attack hitbox against enemies
+        const hitbox = this.getAttackHitbox();
+        if (hitbox) {
+          this.checkAttackCollisions(hitbox);
+        }
+      }
+    }
+  }
+
+  private checkAttackCollisions(hitbox: AttackHitbox) {
+    // Robots
+    for (const r of this.robots) {
+      if (!r.alive) continue;
+      if (this.aabb(hitbox, r)) {
+        r.alive = false;
+        this.robotsKilledThisLevel++;
+        this.player.specialCharge = Math.min(100, this.player.specialCharge + 15);
+        playSound('stomp');
+      }
+    }
+
+    // Bats
+    for (const b of this.bats) {
+      if (!b.alive) continue;
+      if (this.aabb(hitbox, b)) {
+        b.alive = false;
+        this.robotsKilledThisLevel++;
+        this.player.specialCharge = Math.min(100, this.player.specialCharge + 10);
+        playSound('stomp');
+      }
+    }
+
+    // Boss
+    if (this.boss && this.boss.alive && this.boss.invincible <= 0) {
+      if (this.aabb(hitbox, this.boss)) {
+        this.boss.hp -= hitbox.damage;
+        this.boss.invincible = 20;
+        this.boss.vx = hitbox.knockback * (this.player.facing === 'right' ? 1 : -1);
+        this.player.specialCharge = Math.min(100, this.player.specialCharge + 20);
+        playSound('stomp');
+        if (this.boss.hp <= 0) {
+          this.boss.alive = false;
+          this.robotsKilledThisLevel++;
+        }
+      }
+    }
+
+    // Deflect bullets
+    for (let i = this.bullets.length - 1; i >= 0; i--) {
+      if (this.aabb(hitbox, this.bullets[i])) {
+        this.bullets.splice(i, 1);
+      }
+    }
+  }
+
   private aabb(a: {x:number,y:number,w:number,h:number}, b: {x:number,y:number,w:number,h:number}) {
     return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
   }
