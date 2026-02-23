@@ -131,8 +131,8 @@ const ChestRoulette: React.FC<ChestRouletteProps> = ({ targetSkinIndex, onComple
                     }`}
                     style={{ width: ITEM_WIDTH, height: 100 }}
                   >
-                    {/* Skin preview pixel character */}
-                    <SkinPreview skin={skin} />
+                    {/* Skin preview */}
+                    <SkinAvatar skin={skin} size={32} />
                     <span className={`font-pixel text-[6px] text-center leading-tight px-1 ${
                       skin.premium ? 'text-accent' : 'text-muted-foreground'
                     }`}>
