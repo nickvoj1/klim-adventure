@@ -457,11 +457,8 @@ export const LEVELS: LevelData[] = [
     chests: [
       { x: 1020, y: 168, skinIndex: 6 },
     ],
+    boss: { type: 'poison_frog', x: 2300, y: 316, hp: 4, patrolRange: 130 },
     hearts: [
-      { x: 820, y: 232 },
-    ],
-    playerSpawn: { x: 60, y: 300 },
-    flagPos: { x: 2500, y: 320 },
   },
   // Level 7 - Vine Crossing (Medium)
   {
