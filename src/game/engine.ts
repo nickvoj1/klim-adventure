@@ -195,17 +195,21 @@ export class GameEngine {
       p.y -= 16;
     }
 
-    // Jump
+    // Jump - block at borders
+    const atLeftBorder = p.x <= 0;
+    const atRightBorder = p.x >= this.levelData.width - p.w;
     if (this.jumpPressed) {
-      if (p.onGround) {
-        p.vy = JUMP_FORCE;
-        p.onGround = false;
-        p.canDoubleJump = true;
-        playSound('jump');
-      } else if (p.canDoubleJump) {
-        p.vy = JUMP_FORCE;
-        p.canDoubleJump = false;
-        playSound('jump');
+      if (!atLeftBorder && !atRightBorder) {
+        if (p.onGround) {
+          p.vy = JUMP_FORCE;
+          p.onGround = false;
+          p.canDoubleJump = true;
+          playSound('jump');
+        } else if (p.canDoubleJump) {
+          p.vy = JUMP_FORCE;
+          p.canDoubleJump = false;
+          playSound('jump');
+        }
       }
       this.jumpPressed = false;
     }
