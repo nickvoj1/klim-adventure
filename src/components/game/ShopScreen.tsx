@@ -95,11 +95,8 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ totalCoins, unlockedSkins, onBu
                   owned ? 'border-primary bg-primary/10' : 'border-border bg-secondary'
                 }`}
               >
-                <div className="flex flex-col items-center mb-1.5">
-                  <div className="w-3 sm:w-4 h-1.5 sm:h-2" style={{ backgroundColor: skin.hairColor }} />
-                  <div className="w-3 sm:w-4 h-2 sm:h-3" style={{ backgroundColor: skin.headColor }} />
-                  <div className="w-4 sm:w-5 h-2 sm:h-3" style={{ backgroundColor: skin.bodyColor }} />
-                  <div className="w-4 sm:w-5 h-2 sm:h-3" style={{ backgroundColor: skin.pantsColor }} />
+                <div className="mb-1.5">
+                  <SkinAvatar skin={skin} size={36} />
                 </div>
                 <span className="text-[6px] sm:text-[7px] font-pixel text-foreground mb-1 text-center leading-tight">{skin.name}</span>
                 {owned ? (
