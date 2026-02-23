@@ -298,8 +298,8 @@ export const LEVELS: LevelData[] = [
     chests: [
       { x: 1260, y: 88, skinIndex: 4 },
     ],
+    boss: { type: 'scorpion_king', x: 2900, y: 316, hp: 5, patrolRange: 140 },
     hearts: [
-      { x: 520, y: 112 },
       { x: 1820, y: 92 },
     ],
     playerSpawn: { x: 60, y: 240 },
