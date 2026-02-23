@@ -497,6 +497,12 @@ export class GameEngine {
 
     // Spikes
     for (const s of this.spikes) drawSpike(ctx, s);
+    // Moving Spikes
+    for (const ms of this.movingSpikes) drawMovingSpike(ctx, ms, this.tick);
+    // Bats
+    for (const b of this.bats) {
+      if (b.alive) drawBat(ctx, b, this.tick);
+    }
 
     // Coins
     for (const c of this.coins) {
