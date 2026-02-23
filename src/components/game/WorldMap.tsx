@@ -1,5 +1,5 @@
 import React from 'react';
-import { WORLD_MAP } from '@/game/levels';
+import { WORLD_MAP, LEVELS } from '@/game/levels';
 import { playSound } from '@/game/audio';
 
 interface WorldMapProps {
