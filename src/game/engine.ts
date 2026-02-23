@@ -163,6 +163,8 @@ export class GameEngine {
     }
     this.updatePlayer();
     this.updateRobots();
+    this.updateBats();
+    this.updateMovingSpikes();
     this.updateBullets();
     this.checkCollisions();
     this.updateCamera();
