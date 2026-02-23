@@ -251,15 +251,38 @@ export class GameEngine {
   private updatePlayer() {
     const p = this.player;
     if (p.invincible > 0) p.invincible--;
+    if (this.shakeTimer > 0) this.shakeTimer--;
+    if (this.hitFlashTimer > 0) this.hitFlashTimer--;
+
+    // Coyote timer: counts up when not on ground
+    if (p.onGround) {
+      p.coyoteTimer = 0;
+    } else {
+      p.coyoteTimer++;
+    }
+    // Jump buffer countdown
+    if (p.jumpBufferTimer > 0) p.jumpBufferTimer--;
 
     const sprint = this.keys.has('ShiftLeft') || this.keys.has('ShiftRight') || this.touchState.sprint;
-    const speed = sprint ? SPRINT_SPEED : WALK_SPEED;
+    const targetSpeed = sprint ? SPRINT_SPEED : WALK_SPEED;
     const left = this.keys.has('ArrowLeft') || this.keys.has('KeyA') || this.touchState.left;
     const right = this.keys.has('ArrowRight') || this.keys.has('KeyD') || this.touchState.right;
 
-    if (left) { p.vx = -speed; p.facing = 'left'; }
-    else if (right) { p.vx = speed; p.facing = 'right'; }
-    else p.vx = 0;
+    // Smooth acceleration/deceleration
+    const accel = p.onGround ? 0.6 : 0.35; // Less air control
+    const friction = p.onGround ? 0.75 : 0.92; // More ground friction
+
+    if (left) {
+      p.vx = Math.max(p.vx - accel, -targetSpeed);
+      p.facing = 'left';
+    } else if (right) {
+      p.vx = Math.min(p.vx + accel, targetSpeed);
+      p.facing = 'right';
+    } else {
+      // Apply friction for deceleration
+      p.vx *= friction;
+      if (Math.abs(p.vx) < 0.3) p.vx = 0;
+    }
 
     // Crouch
     const wantCrouch = this.keys.has('ArrowDown') || this.keys.has('KeyS');
@@ -273,23 +296,31 @@ export class GameEngine {
       p.y -= 16;
     }
 
-    // Jump - block at borders
-    const atLeftBorder = p.x <= 0;
-    const atRightBorder = p.x >= this.levelData.width - p.w;
-    if (this.jumpPressed) {
-      if (!atLeftBorder && !atRightBorder) {
-        if (p.onGround) {
-          p.vy = JUMP_FORCE;
-          p.onGround = false;
-          p.canDoubleJump = true;
-          playSound('jump');
-        } else if (p.canDoubleJump) {
-          p.vy = JUMP_FORCE;
-          p.canDoubleJump = false;
-          playSound('jump');
-        }
+    // Jump with coyote time (6 frames) and jump buffer (8 frames)
+    const canCoyoteJump = p.coyoteTimer < 6; // Was recently on ground
+    const wantsJump = this.jumpPressed || p.jumpBufferTimer > 0;
+
+    if (wantsJump) {
+      if (canCoyoteJump && (p.onGround || p.coyoteTimer > 0)) {
+        p.vy = JUMP_FORCE;
+        p.onGround = false;
+        p.canDoubleJump = true;
+        p.coyoteTimer = 99; // Consume coyote time
+        p.jumpBufferTimer = 0;
+        playSound('jump');
+      } else if (p.canDoubleJump) {
+        p.vy = JUMP_FORCE;
+        p.canDoubleJump = false;
+        p.jumpBufferTimer = 0;
+        playSound('jump');
       }
       this.jumpPressed = false;
+    }
+
+    // Variable jump height: cut jump short if key released early
+    const jumpHeld = this.keys.has('Space') || this.keys.has('KeyW') || this.keys.has('ArrowUp');
+    if (!jumpHeld && p.vy < -3) {
+      p.vy *= 0.6; // Cut upward velocity for short hops
     }
 
     // Gravity
@@ -305,7 +336,7 @@ export class GameEngine {
     this.resolveCollisionY();
 
     // Animation
-    if (p.vx !== 0 && p.onGround) {
+    if (Math.abs(p.vx) > 0.5 && p.onGround) {
       p.frameTimer++;
       if (p.frameTimer > 6) { p.frame = (p.frame + 1) % 4; p.frameTimer = 0; }
     } else if (!p.onGround) {
@@ -315,14 +346,13 @@ export class GameEngine {
       p.frameTimer = 0;
     }
 
-    // Fall death
-    if (p.y > CANVAS_HEIGHT + 200) {
+    // Fall death (faster detection)
+    if (p.y > CANVAS_HEIGHT + 80) {
       this.playerDeath();
     }
 
-    // Left boundary
+    // Boundaries (no jump blocking!)
     if (p.x < 0) p.x = 0;
-    // Right boundary
     if (p.x > this.levelData.width - p.w) p.x = this.levelData.width - p.w;
   }
 
