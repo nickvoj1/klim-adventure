@@ -599,9 +599,8 @@ export const LEVELS: LevelData[] = [
     chests: [
       { x: 1030, y: 88, skinIndex: 8 },
     ],
+    boss: { type: 'jungle_hawk', x: 2700, y: 280, hp: 5, patrolRange: 150 },
     hearts: [
-      { x: 560, y: 132 },
-      { x: 2100, y: 132 },
     ],
     playerSpawn: { x: 60, y: 280 },
     flagPos: { x: 2900, y: 320 },
