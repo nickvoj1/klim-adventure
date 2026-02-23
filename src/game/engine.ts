@@ -181,6 +181,7 @@ export class GameEngine {
     this.updateRobots();
     this.updateBats();
     this.updateMovingSpikes();
+    this.updateBoss();
     this.updateBullets();
     this.checkCollisions();
     this.updateCamera();
