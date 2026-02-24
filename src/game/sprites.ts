@@ -90,9 +90,9 @@ class SpriteManager {
   }
 
   get(key: string): SpriteSheet | null {
-    const sprite = this.sprites.get(key);
-    if (!sprite || !sprite.loaded) return null;
-    return sprite;
+    // Disable sprite sheet rendering - AI-generated images are not proper
+    // multi-frame sprite sheets, causing broken animations. Use programmatic fallback.
+    return null;
   }
 
   /**
