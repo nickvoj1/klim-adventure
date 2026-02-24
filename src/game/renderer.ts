@@ -723,6 +723,9 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, p: Player, skin: Skin)
   }
 
   // Fallback to programmatic drawing
+  // Add aura and speed particles for fallback path too
+  drawPlayerAura(ctx, p);
+  spawnSpeedParticles(p);
   const dir = p.facing === 'right' ? 1 : -1;
   const bx = p.x + (dir === -1 ? p.w : 0);
   const bodyDark = adjustColor(skin.bodyColor, -40);
