@@ -608,6 +608,72 @@ export function drawPlatform(ctx: CanvasRenderingContext2D, p: Platform, color: 
   ctx.globalAlpha = 1;
 }
 
+// Player aura glow - intensity scales with speed
+function drawPlayerAura(ctx: CanvasRenderingContext2D, p: Player) {
+  const speed = Math.abs(p.vx);
+  const cx = p.x + p.w / 2;
+  const cy = p.y + p.h / 2;
+  
+  // Base ambient aura (always visible, subtle)
+  drawGlow(ctx, cx, cy, 24, '#6677ff', 0.06);
+  
+  // Speed-based aura (grows with velocity)
+  if (speed > 1) {
+    const intensity = Math.min(speed / 8, 1);
+    const radius = 20 + intensity * 16;
+    // Shift from indigo to cyan at high speed
+    const r = Math.round(60 + intensity * 0);
+    const g = Math.round(100 + intensity * 155);
+    const b = Math.round(255);
+    drawGlow(ctx, cx, cy, radius, `rgb(${r},${g},${b})`, 0.05 + intensity * 0.12);
+  }
+  
+  // Jump burst aura
+  if (!p.onGround && p.vy < -4) {
+    drawGlow(ctx, cx, cy + 8, 18, '#88ddff', 0.1);
+  }
+  
+  // Attack aura flash
+  if (p.attacking !== 'none' && p.attackTimer > 0) {
+    const flash = p.attackTimer / 12;
+    const attackColor = p.attacking === 'special' ? '#44ffff' : '#ffaa44';
+    drawGlow(ctx, cx, cy, 30, attackColor, flash * 0.15);
+  }
+}
+
+// Spawn speed trail particles behind fast-moving player
+function spawnSpeedParticles(p: Player) {
+  const speed = Math.abs(p.vx);
+  if (speed > 3 && p.onGround) {
+    // Ground dust
+    const dustX = p.facing === 'right' ? p.x - 2 : p.x + p.w + 2;
+    spawnParticle(
+      dustX, p.y + p.h - 2,
+      (Math.random() - 0.5) * 0.8 - p.vx * 0.1,
+      -Math.random() * 1.2,
+      12 + Math.random() * 8,
+      '#aabbcc',
+      2 + Math.random()
+    );
+  }
+  if (speed > 5) {
+    // Speed streak
+    const streakX = p.facing === 'right' ? p.x : p.x + p.w;
+    spawnParticle(
+      streakX, p.y + p.h * 0.3 + Math.random() * p.h * 0.4,
+      -p.vx * 0.3,
+      (Math.random() - 0.5) * 0.3,
+      8 + Math.random() * 6,
+      '#88bbff',
+      1.5
+    );
+  }
+  // Landing burst
+  if (p.onGround && p.vy === 0 && p.coyoteTimer === 0) {
+    // Only on first frame of landing (coyoteTimer resets to 0)
+  }
+}
+
 // ===== PLAYER =====
 
 export function drawPlayer(ctx: CanvasRenderingContext2D, p: Player, skin: Skin) {
