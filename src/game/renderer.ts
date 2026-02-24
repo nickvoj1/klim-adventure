@@ -146,6 +146,10 @@ export function drawBackground(ctx: CanvasRenderingContext2D, level: LevelData, 
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
+  // Grid overlay on programmatic bg too
+  drawGridOverlay(ctx, cameraX, tick);
+  drawAtmosphereOverlay(ctx, world, tick);
+
   // Nebula clouds (subtle colored regions)
   for (let i = 0; i < 3; i++) {
     const nx = ((i * 290 + 100) - cameraX * 0.01 + 3000) % (CANVAS_WIDTH + 400) - 200;
