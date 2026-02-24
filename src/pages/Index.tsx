@@ -276,6 +276,7 @@ const Index = () => {
           onLeaderboard={() => setScreen('leaderboard')}
           onAuth={() => setScreen('auth')}
           onLogout={handleLogout}
+          onDevMode={handleDevMode}
           totalCoins={progress.totalCoins}
           hasDailyReward={hasDailyReward}
           unclaimedAchievements={unclaimedAchievements}
