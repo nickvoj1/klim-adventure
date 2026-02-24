@@ -52,6 +52,51 @@ function updateAndDrawParticles(ctx: CanvasRenderingContext2D) {
   ctx.globalAlpha = 1;
 }
 
+// ===== GRID & ATMOSPHERE OVERLAYS =====
+
+function drawGridOverlay(ctx: CanvasRenderingContext2D, cameraX: number, _tick: number) {
+  const gridSize = 40;
+  const offsetX = -(cameraX * 0.3) % gridSize;
+  ctx.strokeStyle = 'rgba(255,255,255,0.025)';
+  ctx.lineWidth = 1;
+  // Vertical lines
+  for (let x = offsetX; x < CANVAS_WIDTH; x += gridSize) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, CANVAS_HEIGHT);
+    ctx.stroke();
+  }
+  // Horizontal lines
+  for (let y = 0; y < CANVAS_HEIGHT; y += gridSize) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(CANVAS_WIDTH, y);
+    ctx.stroke();
+  }
+}
+
+function drawAtmosphereOverlay(ctx: CanvasRenderingContext2D, world: string, tick: number) {
+  // Top gradient wash
+  const atmGrad = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT * 0.5);
+  if (world === 'Jungle') {
+    atmGrad.addColorStop(0, 'rgba(0,80,40,0.12)');
+    atmGrad.addColorStop(1, 'transparent');
+  } else {
+    atmGrad.addColorStop(0, 'rgba(60,40,100,0.12)');
+    atmGrad.addColorStop(1, 'transparent');
+  }
+  ctx.fillStyle = atmGrad;
+  ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT * 0.5);
+
+  // Subtle vignette at edges
+  const vignetteAlpha = 0.15 + Math.sin(tick * 0.005) * 0.03;
+  const vGrad = ctx.createRadialGradient(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, CANVAS_WIDTH * 0.3, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, CANVAS_WIDTH * 0.7);
+  vGrad.addColorStop(0, 'transparent');
+  vGrad.addColorStop(1, `rgba(0,0,0,${vignetteAlpha})`);
+  ctx.fillStyle = vGrad;
+  ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+}
+
 // ===== BACKGROUND =====
 
 export function drawBackground(ctx: CanvasRenderingContext2D, level: LevelData, cameraX: number, tick: number) {
