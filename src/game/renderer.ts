@@ -559,6 +559,48 @@ export function drawPlatform(ctx: CanvasRenderingContext2D, p: Platform, color: 
 // ===== PLAYER =====
 
 export function drawPlayer(ctx: CanvasRenderingContext2D, p: Player, skin: Skin) {
+  // Try sprite-based rendering
+  const isAttacking = p.attacking !== 'none' && p.attackTimer > 0;
+  let frameIndex = 0;
+  if (isAttacking) {
+    frameIndex = p.attacking === 'punch' ? 6 : 7; // punch=frame 6, kick/special=frame 7
+  } else if (!p.onGround) {
+    frameIndex = 5; // jump
+  } else if (Math.abs(p.vx) > 0.5) {
+    frameIndex = 1 + (p.frame % 4); // walk cycle frames 1-4
+  } else {
+    frameIndex = 0; // idle
+  }
+
+  const flipX = p.facing === 'left';
+  const spriteDrawn = spriteManager.drawFrame(
+    ctx, 'player', frameIndex,
+    p.x - 6, p.y - 4, 32, 36, // Slightly larger than hitbox for visual appeal
+    flipX
+  );
+
+  if (spriteDrawn) {
+    // Still draw attack effects and special aura via programmatic overlay
+    if (isAttacking && p.attacking === 'special') {
+      const attackPhase = p.attackTimer / 24;
+      ctx.globalAlpha = attackPhase * 0.3;
+      ctx.fillStyle = '#44ddff';
+      ctx.fillRect(p.x - 6, p.y - 4, 32, 40);
+      ctx.globalAlpha = 1;
+    }
+    // Ground shadow
+    if (p.onGround) {
+      ctx.fillStyle = '#000000';
+      ctx.globalAlpha = 0.2;
+      ctx.beginPath();
+      ctx.ellipse(p.x + p.w / 2, p.y + p.h + 1, p.w * 0.6, 3, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    return;
+  }
+
+  // Fallback to programmatic drawing
   const dir = p.facing === 'right' ? 1 : -1;
   const bx = p.x + (dir === -1 ? p.w : 0);
   const bodyDark = adjustColor(skin.bodyColor, -40);
