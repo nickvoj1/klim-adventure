@@ -771,7 +771,8 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, p: Player, skin: Skin)
 
 export function drawRobot(ctx: CanvasRenderingContext2D, r: Robot) {
   // Try sprite-based rendering
-  const robotFrame = Math.floor(r.frame / 15) % 4;
+  // Smoother robot animation - 8 frames per sprite change
+  const robotFrame = Math.floor(r.frame / 8) % 4;
   const flipX = r.vx < 0;
   const spriteDrawn = spriteManager.drawFrame(ctx, 'robot', robotFrame, r.x - 4, r.y - 4, 32, 32, flipX);
   if (spriteDrawn) {
