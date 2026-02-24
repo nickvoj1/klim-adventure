@@ -52,6 +52,51 @@ function updateAndDrawParticles(ctx: CanvasRenderingContext2D) {
   ctx.globalAlpha = 1;
 }
 
+// ===== GRID & ATMOSPHERE OVERLAYS =====
+
+function drawGridOverlay(ctx: CanvasRenderingContext2D, cameraX: number, _tick: number) {
+  const gridSize = 40;
+  const offsetX = -(cameraX * 0.3) % gridSize;
+  ctx.strokeStyle = 'rgba(255,255,255,0.025)';
+  ctx.lineWidth = 1;
+  // Vertical lines
+  for (let x = offsetX; x < CANVAS_WIDTH; x += gridSize) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, CANVAS_HEIGHT);
+    ctx.stroke();
+  }
+  // Horizontal lines
+  for (let y = 0; y < CANVAS_HEIGHT; y += gridSize) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(CANVAS_WIDTH, y);
+    ctx.stroke();
+  }
+}
+
+function drawAtmosphereOverlay(ctx: CanvasRenderingContext2D, world: string, tick: number) {
+  // Top gradient wash
+  const atmGrad = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT * 0.5);
+  if (world === 'Jungle') {
+    atmGrad.addColorStop(0, 'rgba(0,80,40,0.12)');
+    atmGrad.addColorStop(1, 'transparent');
+  } else {
+    atmGrad.addColorStop(0, 'rgba(60,40,100,0.12)');
+    atmGrad.addColorStop(1, 'transparent');
+  }
+  ctx.fillStyle = atmGrad;
+  ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT * 0.5);
+
+  // Subtle vignette at edges
+  const vignetteAlpha = 0.15 + Math.sin(tick * 0.005) * 0.03;
+  const vGrad = ctx.createRadialGradient(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, CANVAS_WIDTH * 0.3, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, CANVAS_WIDTH * 0.7);
+  vGrad.addColorStop(0, 'transparent');
+  vGrad.addColorStop(1, `rgba(0,0,0,${vignetteAlpha})`);
+  ctx.fillStyle = vGrad;
+  ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+}
+
 // ===== BACKGROUND =====
 
 export function drawBackground(ctx: CanvasRenderingContext2D, level: LevelData, cameraX: number, tick: number) {
@@ -67,6 +112,11 @@ export function drawBackground(ctx: CanvasRenderingContext2D, level: LevelData, 
     ctx.drawImage(bgSprite.image, parallaxX, 0, bgWidth, CANVAS_HEIGHT);
     ctx.drawImage(bgSprite.image, parallaxX + bgWidth, 0, bgWidth, CANVAS_HEIGHT);
     
+    // Grid overlay (subtle, stylish)
+    drawGridOverlay(ctx, cameraX, tick);
+    // Atmospheric gradient wash
+    drawAtmosphereOverlay(ctx, world, tick);
+
     // Still draw foreground parallax elements over the background
     if (world === 'Jungle') {
       drawJungleForegroundEffects(ctx, cameraX, tick);
@@ -95,6 +145,10 @@ export function drawBackground(ctx: CanvasRenderingContext2D, level: LevelData, 
   }
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+  // Grid overlay on programmatic bg too
+  drawGridOverlay(ctx, cameraX, tick);
+  drawAtmosphereOverlay(ctx, world, tick);
 
   // Nebula clouds (subtle colored regions)
   for (let i = 0; i < 3; i++) {
@@ -554,6 +608,72 @@ export function drawPlatform(ctx: CanvasRenderingContext2D, p: Platform, color: 
   ctx.globalAlpha = 1;
 }
 
+// Player aura glow - intensity scales with speed
+function drawPlayerAura(ctx: CanvasRenderingContext2D, p: Player) {
+  const speed = Math.abs(p.vx);
+  const cx = p.x + p.w / 2;
+  const cy = p.y + p.h / 2;
+  
+  // Base ambient aura (always visible, subtle)
+  drawGlow(ctx, cx, cy, 24, '#6677ff', 0.06);
+  
+  // Speed-based aura (grows with velocity)
+  if (speed > 1) {
+    const intensity = Math.min(speed / 8, 1);
+    const radius = 20 + intensity * 16;
+    // Shift from indigo to cyan at high speed
+    const r = Math.round(60 + intensity * 0);
+    const g = Math.round(100 + intensity * 155);
+    const b = Math.round(255);
+    drawGlow(ctx, cx, cy, radius, `rgb(${r},${g},${b})`, 0.05 + intensity * 0.12);
+  }
+  
+  // Jump burst aura
+  if (!p.onGround && p.vy < -4) {
+    drawGlow(ctx, cx, cy + 8, 18, '#88ddff', 0.1);
+  }
+  
+  // Attack aura flash
+  if (p.attacking !== 'none' && p.attackTimer > 0) {
+    const flash = p.attackTimer / 12;
+    const attackColor = p.attacking === 'special' ? '#44ffff' : '#ffaa44';
+    drawGlow(ctx, cx, cy, 30, attackColor, flash * 0.15);
+  }
+}
+
+// Spawn speed trail particles behind fast-moving player
+function spawnSpeedParticles(p: Player) {
+  const speed = Math.abs(p.vx);
+  if (speed > 3 && p.onGround) {
+    // Ground dust
+    const dustX = p.facing === 'right' ? p.x - 2 : p.x + p.w + 2;
+    spawnParticle(
+      dustX, p.y + p.h - 2,
+      (Math.random() - 0.5) * 0.8 - p.vx * 0.1,
+      -Math.random() * 1.2,
+      12 + Math.random() * 8,
+      '#aabbcc',
+      2 + Math.random()
+    );
+  }
+  if (speed > 5) {
+    // Speed streak
+    const streakX = p.facing === 'right' ? p.x : p.x + p.w;
+    spawnParticle(
+      streakX, p.y + p.h * 0.3 + Math.random() * p.h * 0.4,
+      -p.vx * 0.3,
+      (Math.random() - 0.5) * 0.3,
+      8 + Math.random() * 6,
+      '#88bbff',
+      1.5
+    );
+  }
+  // Landing burst
+  if (p.onGround && p.vy === 0 && p.coyoteTimer === 0) {
+    // Only on first frame of landing (coyoteTimer resets to 0)
+  }
+}
+
 // ===== PLAYER =====
 
 export function drawPlayer(ctx: CanvasRenderingContext2D, p: Player, skin: Skin) {
@@ -586,6 +706,10 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, p: Player, skin: Skin)
       ctx.fillRect(p.x - 6, p.y - 4, 32, 40);
       ctx.globalAlpha = 1;
     }
+    // Dynamic glow aura behind player (color based on speed)
+    drawPlayerAura(ctx, p);
+    // Speed trail particles
+    spawnSpeedParticles(p);
     // Ground shadow
     if (p.onGround) {
       ctx.fillStyle = '#000000';
@@ -599,6 +723,9 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, p: Player, skin: Skin)
   }
 
   // Fallback to programmatic drawing
+  // Add aura and speed particles for fallback path too
+  drawPlayerAura(ctx, p);
+  spawnSpeedParticles(p);
   const dir = p.facing === 'right' ? 1 : -1;
   const bx = p.x + (dir === -1 ? p.w : 0);
   const bodyDark = adjustColor(skin.bodyColor, -40);
