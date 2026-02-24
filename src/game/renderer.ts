@@ -771,7 +771,8 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, p: Player, skin: Skin)
 
 export function drawRobot(ctx: CanvasRenderingContext2D, r: Robot) {
   // Try sprite-based rendering
-  const robotFrame = Math.floor(r.frame / 15) % 4;
+  // Smoother robot animation - 8 frames per sprite change
+  const robotFrame = Math.floor(r.frame / 8) % 4;
   const flipX = r.vx < 0;
   const spriteDrawn = spriteManager.drawFrame(ctx, 'robot', robotFrame, r.x - 4, r.y - 4, 32, 32, flipX);
   if (spriteDrawn) {
@@ -888,7 +889,8 @@ export function drawCoin(ctx: CanvasRenderingContext2D, c: Coin, tick: number) {
   const bob = Math.sin(tick * 0.05 + c.bobOffset) * 3;
 
   // Try sprite-based coin rendering
-  const coinFrame = Math.floor(tick / 10) % 4;
+  // Smoother coin spin - 8 frames per change
+  const coinFrame = Math.floor(tick / 8) % 4;
   const spriteDrawn = spriteManager.drawFrame(ctx, 'coin', coinFrame, c.x - 2, c.y - 2 + bob, 20, 20);
   if (spriteDrawn) {
     // Add glow
@@ -1311,7 +1313,8 @@ export function drawMovingSpike(ctx: CanvasRenderingContext2D, ms: MovingSpike, 
 
 export function drawBat(ctx: CanvasRenderingContext2D, b: Bat, tick: number) {
   // Try sprite-based rendering
-  const batFrame = Math.floor(b.frame / 8) % 4;
+  // Smoother bat wing flap - 6 frames per sprite change
+  const batFrame = Math.floor(b.frame / 6) % 4;
   const flipX = b.vx < 0;
   const spriteDrawn = spriteManager.drawFrame(ctx, 'bat', batFrame, b.x - 6, b.y - 6, 32, 28, flipX);
   if (spriteDrawn) {

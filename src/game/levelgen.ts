@@ -44,6 +44,8 @@ export function generateLevel(levelIndex: number): LevelData {
     cursor += gap;
 
     // Ground segment
+    const groundStart = cursor;
+    const groundEnd = cursor + segW;
     platforms.push(ground(cursor, segW));
 
     // Maybe elevated platform
@@ -67,16 +69,26 @@ export function generateLevel(levelIndex: number): LevelData {
       coins.push({ x: cx + 30, y: 340 });
     }
 
-    // Robot
+    // Robot - ensure patrol range stays within ground segment
     if (rng() < 0.4) {
-      robots.push({ x: cursor + 60 + Math.floor(rng() * (segW - 120)), y: 344, patrolRange: 60 + Math.floor(rng() * 60) });
+      const margin = 60;
+      const rx = groundStart + margin + Math.floor(rng() * Math.max(1, segW - margin * 2));
+      const pr = Math.min(60 + Math.floor(rng() * 60), Math.floor((segW - margin) / 2));
+      robots.push({ x: rx, y: 344, patrolRange: pr });
     }
 
-    // Spikes
+    // Spikes - MUST be within the ground segment boundaries
     if (rng() < 0.5) {
-      const sx = cursor + Math.floor(rng() * (segW - 64));
-      spikes.push({ x: sx, y: 360 });
-      if (rng() < 0.5) spikes.push({ x: sx + 32, y: 360 });
+      const spikeMargin = 20;
+      const maxSpikeX = groundEnd - 64 - spikeMargin;
+      const minSpikeX = groundStart + spikeMargin;
+      if (maxSpikeX > minSpikeX) {
+        const sx = minSpikeX + Math.floor(rng() * (maxSpikeX - minSpikeX));
+        spikes.push({ x: sx, y: 360 });
+        if (rng() < 0.5 && sx + 32 < groundEnd - spikeMargin) {
+          spikes.push({ x: sx + 32, y: 360 });
+        }
+      }
     }
 
     // Bat
@@ -90,14 +102,19 @@ export function generateLevel(levelIndex: number): LevelData {
       });
     }
 
-    // Moving spike
+    // Moving spike - keep within ground segment
     if (rng() < 0.25) {
-      const msX = cursor + Math.floor(rng() * (segW - 100));
-      movingSpikes.push({
-        startX: msX, startY: 360,
-        endX: msX + 100 + Math.floor(rng() * 100), endY: 360,
-        speed: 0.004 + rng() * 0.005,
-      });
+      const msMargin = 20;
+      const msRange = 100 + Math.floor(rng() * 100);
+      const msX = groundStart + msMargin + Math.floor(rng() * Math.max(1, segW - msRange - msMargin * 2));
+      const msEndX = Math.min(msX + msRange, groundEnd - msMargin);
+      if (msEndX > msX + 50) {
+        movingSpikes.push({
+          startX: msX, startY: 360,
+          endX: msEndX, endY: 360,
+          speed: 0.004 + rng() * 0.005,
+        });
+      }
     }
 
     cursor += segW;

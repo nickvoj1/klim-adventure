@@ -340,15 +340,18 @@ export class GameEngine {
     p.y += p.vy;
     this.resolveCollisionY();
 
-    // Animation
+    // Animation - smoother walk cycle with speed-based timing
     if (Math.abs(p.vx) > 0.5 && p.onGround) {
       p.frameTimer++;
-      if (p.frameTimer > 6) { p.frame = (p.frame + 1) % 4; p.frameTimer = 0; }
+      const animSpeed = Math.abs(p.vx) > 4 ? 4 : 5; // Faster anim when sprinting
+      if (p.frameTimer > animSpeed) { p.frame = (p.frame + 1) % 4; p.frameTimer = 0; }
     } else if (!p.onGround) {
-      p.frame = 1;
+      // Distinguish jump vs fall
+      p.frame = p.vy < -2 ? 1 : (p.vy > 2 ? 2 : 1);
     } else {
-      p.frame = 0;
-      p.frameTimer = 0;
+      // Idle breathing effect via slow frame cycle
+      p.frameTimer++;
+      if (p.frameTimer > 30) { p.frame = p.frame === 0 ? 3 : 0; p.frameTimer = 0; }
     }
 
     // Fall death (faster detection)
@@ -469,12 +472,13 @@ export class GameEngine {
     for (const r of this.robots) {
       if (!r.alive) continue;
       r.x += r.vx;
+      // Keep robot within patrol bounds AND on platforms
       if (r.x <= r.patrolStart || r.x >= r.patrolEnd) r.vx *= -1;
       r.frame++;
 
       r.shootTimer--;
       if (r.shootTimer <= 0) {
-        r.shootTimer = 120;
+        r.shootTimer = 100 + Math.floor(Math.random() * 40); // Slight variation
         const dir = this.player.x > r.x ? 1 : -1;
         this.bullets.push({
           x: r.x + (dir > 0 ? r.w : -8),
@@ -628,7 +632,9 @@ export class GameEngine {
   private updateBats() {
     for (const b of this.bats) {
       if (!b.alive) continue;
-      b.x += b.vx;
+      // Smoother bat movement with slight speed variation
+      const batSpeed = 0.8 + Math.sin(b.frame * 0.01) * 0.3;
+      b.x += b.vx * batSpeed;
       if (b.x <= b.patrolStart || b.x >= b.patrolEnd) b.vx *= -1;
       b.frame++;
       b.y = b.baseY + Math.sin(b.frame * b.frequency) * b.amplitude;
