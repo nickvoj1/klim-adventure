@@ -687,7 +687,7 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, p: Player, skin: Skin)
     pixelRect(ctx, 7, 20, 4, 1, '#ccaa00'); // buckle
 
     // Arms with attack poses
-    if (isAttacking && p.attacking === 'punch') {
+    if (isAttackingFallback && p.attacking === 'punch') {
       // Punch arm extended
       const ext = (1 - attackPhase) * 12;
       pixelRect(ctx, 16, 14, 4 + ext, 6, skin.bodyColor);
