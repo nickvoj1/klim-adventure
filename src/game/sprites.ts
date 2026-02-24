@@ -31,10 +31,15 @@ export interface SpriteConfig {
 }
 
 const SPRITE_CONFIGS: Record<string, SpriteConfig> = {
+  // Player: 4 cols x 2 rows = 8 frames (walk1-4, walk5/jump/punch/kick)
   player: { url: playerSheetUrl, frameWidth: 128, frameHeight: 128, cols: 4, rows: 2 },
-  robot: { url: robotSheetUrl, frameWidth: 128, frameHeight: 128, cols: 2, rows: 2 },
-  bat: { url: batSheetUrl, frameWidth: 256, frameHeight: 170, cols: 2, rows: 2 },
-  coin: { url: coinSheetUrl, frameWidth: 128, frameHeight: 128, cols: 4, rows: 1 },
+  // Robot: 2 cols x 2 rows = 4 frames (stand, walk, walk2, shoot)
+  robot: { url: robotSheetUrl, frameWidth: 256, frameHeight: 256, cols: 2, rows: 2 },
+  // Bat: 2 cols x 2 rows = 4 wing flap frames
+  bat: { url: batSheetUrl, frameWidth: 256, frameHeight: 256, cols: 2, rows: 2 },
+  // Coin: 2 cols x 2 rows = 4 rotation frames
+  coin: { url: coinSheetUrl, frameWidth: 256, frameHeight: 256, cols: 2, rows: 2 },
+  // Single-frame tilesets and backgrounds
   desertTiles: { url: desertTilesUrl, frameWidth: 512, frameHeight: 512, cols: 1, rows: 1 },
   jungleTiles: { url: jungleTilesUrl, frameWidth: 512, frameHeight: 512, cols: 1, rows: 1 },
   desertBg: { url: desertBgUrl, frameWidth: 1024, frameHeight: 512, cols: 1, rows: 1 },
@@ -90,9 +95,9 @@ class SpriteManager {
   }
 
   get(key: string): SpriteSheet | null {
-    // Disable sprite sheet rendering - AI-generated images are not proper
-    // multi-frame sprite sheets, causing broken animations. Use programmatic fallback.
-    return null;
+    const sprite = this.sprites.get(key);
+    if (!sprite || !sprite.loaded) return null;
+    return sprite;
   }
 
   /**
