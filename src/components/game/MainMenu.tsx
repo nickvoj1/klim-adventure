@@ -9,6 +9,7 @@ interface MainMenuProps {
   onLeaderboard: () => void;
   onAuth: () => void;
   onLogout: () => void;
+  onDevMode?: () => void;
   totalCoins: number;
   hasDailyReward: boolean;
   unclaimedAchievements: number;
@@ -17,10 +18,23 @@ interface MainMenuProps {
 }
 
 const MainMenu: React.FC<MainMenuProps> = ({
-  onPlay, onShop, onSkins, onAchievements, onLeaderboard, onAuth, onLogout,
+  onPlay, onShop, onSkins, onAchievements, onLeaderboard, onAuth, onLogout, onDevMode,
   totalCoins, hasDailyReward, unclaimedAchievements, isLoggedIn, displayName,
 }) => {
   const [selected, setSelected] = useState(0);
+  const tapCountRef = React.useRef(0);
+  const tapTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleTitleTap = () => {
+    tapCountRef.current += 1;
+    if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
+    if (tapCountRef.current >= 3) {
+      tapCountRef.current = 0;
+      onDevMode?.();
+    } else {
+      tapTimerRef.current = setTimeout(() => { tapCountRef.current = 0; }, 600);
+    }
+  };
   const buttons = [
     { label: '▶ PLAY', action: onPlay, notify: false },
     { label: '🏆 LEADERBOARD', action: onLeaderboard, notify: false },
@@ -79,10 +93,16 @@ const MainMenu: React.FC<MainMenuProps> = ({
         )}
       </div>
 
-      <h1 className="text-xl sm:text-2xl md:text-3xl font-pixel text-primary glow-green mb-1 sm:mb-2 pixel-shadow text-center leading-relaxed z-20">
+      <h1
+        onClick={handleTitleTap}
+        className="text-xl sm:text-2xl md:text-3xl font-pixel text-primary glow-green mb-1 sm:mb-2 pixel-shadow text-center leading-relaxed z-20 cursor-default select-none"
+      >
         KLIM
       </h1>
-      <h1 className="text-lg sm:text-xl md:text-2xl font-pixel text-accent glow-gold mb-4 sm:mb-6 pixel-shadow text-center leading-relaxed z-20">
+      <h1
+        onClick={handleTitleTap}
+        className="text-lg sm:text-xl md:text-2xl font-pixel text-accent glow-gold mb-4 sm:mb-6 pixel-shadow text-center leading-relaxed z-20 cursor-default select-none"
+      >
         ADVENTURE
       </h1>
 

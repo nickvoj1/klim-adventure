@@ -240,6 +240,15 @@ const Index = () => {
     setSession(null);
   }, []);
 
+  const handleDevMode = useCallback(() => {
+    setProgress(p => ({
+      ...p,
+      totalCoins: 9999,
+      unlockedSkins: p.unlockedSkins.map(() => true),
+      unlockedLevels: 20,
+    }));
+  }, []);
+
   return (
     <div className="flex flex-col items-center justify-center min-h-svh bg-background p-2 sm:p-4 overflow-hidden">
       {/* Chest Roulette Overlay */}
@@ -267,6 +276,7 @@ const Index = () => {
           onLeaderboard={() => setScreen('leaderboard')}
           onAuth={() => setScreen('auth')}
           onLogout={handleLogout}
+          onDevMode={handleDevMode}
           totalCoins={progress.totalCoins}
           hasDailyReward={hasDailyReward}
           unclaimedAchievements={unclaimedAchievements}
