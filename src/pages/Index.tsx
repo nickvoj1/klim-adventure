@@ -248,7 +248,11 @@ const Index = () => {
       unlockedSkins: p.unlockedSkins.map(() => true),
       unlockedLevels: 20,
     }));
-    toast({ title: '🔓 Dev Mode Activated', description: '9999 coins, all skins & levels unlocked!' });
+    toast({
+      title: '🔓 Dev Mode Activated',
+      description: '9999 coins, all skins & levels unlocked!',
+      className: 'font-pixel border-2 border-primary bg-background text-primary shadow-[4px_4px_0px_hsl(var(--primary))] text-xs',
+    });
   }, []);
 
   return (
