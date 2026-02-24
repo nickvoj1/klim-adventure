@@ -1312,7 +1312,8 @@ export function drawMovingSpike(ctx: CanvasRenderingContext2D, ms: MovingSpike, 
 
 export function drawBat(ctx: CanvasRenderingContext2D, b: Bat, tick: number) {
   // Try sprite-based rendering
-  const batFrame = Math.floor(b.frame / 8) % 4;
+  // Smoother bat wing flap - 6 frames per sprite change
+  const batFrame = Math.floor(b.frame / 6) % 4;
   const flipX = b.vx < 0;
   const spriteDrawn = spriteManager.drawFrame(ctx, 'bat', batFrame, b.x - 6, b.y - 6, 32, 28, flipX);
   if (spriteDrawn) {
