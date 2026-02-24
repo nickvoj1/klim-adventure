@@ -4,6 +4,7 @@ import { generateLevel } from './levelgen';
 import { playSound } from './audio';
 import { drawBackground, drawPlatform, drawPlayer, drawRobot, drawBullet, drawCoin, drawSpike, drawMovingSpike, drawBat, drawHeart, drawChest, drawFlag } from './renderer';
 import { drawBoss, drawBossName } from './boss-renderer';
+import { spriteManager } from './sprites';
 
 export interface EngineCallbacks {
   onLevelComplete: (coinsCollected: number, stats: LevelStats) => void;
