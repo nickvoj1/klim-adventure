@@ -93,10 +93,16 @@ const MainMenu: React.FC<MainMenuProps> = ({
         )}
       </div>
 
-      <h1 className="text-xl sm:text-2xl md:text-3xl font-pixel text-primary glow-green mb-1 sm:mb-2 pixel-shadow text-center leading-relaxed z-20">
+      <h1
+        onClick={handleTitleTap}
+        className="text-xl sm:text-2xl md:text-3xl font-pixel text-primary glow-green mb-1 sm:mb-2 pixel-shadow text-center leading-relaxed z-20 cursor-default select-none"
+      >
         KLIM
       </h1>
-      <h1 className="text-lg sm:text-xl md:text-2xl font-pixel text-accent glow-gold mb-4 sm:mb-6 pixel-shadow text-center leading-relaxed z-20">
+      <h1
+        onClick={handleTitleTap}
+        className="text-lg sm:text-xl md:text-2xl font-pixel text-accent glow-gold mb-4 sm:mb-6 pixel-shadow text-center leading-relaxed z-20 cursor-default select-none"
+      >
         ADVENTURE
       </h1>
 
