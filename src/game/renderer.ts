@@ -889,7 +889,8 @@ export function drawCoin(ctx: CanvasRenderingContext2D, c: Coin, tick: number) {
   const bob = Math.sin(tick * 0.05 + c.bobOffset) * 3;
 
   // Try sprite-based coin rendering
-  const coinFrame = Math.floor(tick / 10) % 4;
+  // Smoother coin spin - 8 frames per change
+  const coinFrame = Math.floor(tick / 8) % 4;
   const spriteDrawn = spriteManager.drawFrame(ctx, 'coin', coinFrame, c.x - 2, c.y - 2 + bob, 20, 20);
   if (spriteDrawn) {
     // Add glow
