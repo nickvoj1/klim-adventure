@@ -654,8 +654,7 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, p: Player, skin: Skin)
       ctx.globalAlpha = 1;
     }
     return;
-
-
+  }
 
   // Fallback to programmatic drawing
   const dir = p.facing === 'right' ? 1 : -1;
