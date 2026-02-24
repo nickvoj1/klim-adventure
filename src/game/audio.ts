@@ -50,5 +50,8 @@ export function playSound(sound: string) {
     case 'select':
       beep(500, 0.05);
       break;
+    case 'devmode':
+      [300,400,500,600,800,1000,1200,1600].forEach((f,i) => setTimeout(() => beep(f, 0.12, 'square', 0.12), i*70));
+      break;
   }
 }

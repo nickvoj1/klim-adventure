@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { GameScreen as GameScreenType, GameProgress, LevelStats } from '@/game/types';
 import { DEFAULT_PROGRESS, ACHIEVEMENTS, DAILY_REWARDS } from '@/game/constants';
 import { supabase } from '@/integrations/supabase/client';
+import { playSound } from '@/game/audio';
 import MainMenu from '@/components/game/MainMenu';
 import GameScreen from '@/components/game/GameScreen';
 import GameOverScreen from '@/components/game/GameOverScreen';
@@ -242,6 +243,7 @@ const Index = () => {
   }, []);
 
   const handleDevMode = useCallback(() => {
+    playSound('devmode');
     setProgress(p => ({
       ...p,
       totalCoins: 9999,
