@@ -81,6 +81,7 @@ export const SKINS: Skin[] = [
   { name: 'Cyber Phantom', bodyColor: '#0d0d2b', headColor: '#00ffcc', hairColor: '#ff00ff', pantsColor: '#1a0033', premium: true, price: 1500, rarity: 'legendary' },
   { name: 'Solar Flare', bodyColor: '#ff4400', headColor: '#ffdd00', hairColor: '#ff8800', pantsColor: '#cc2200', premium: true, price: 1200, rarity: 'legendary' },
   { name: 'Deep Sea King', bodyColor: '#003366', headColor: '#00ccaa', hairColor: '#001144', pantsColor: '#004488', premium: true, price: 800, rarity: 'epic' },
+  { name: 'Frost Wraith', bodyColor: '#b0d0ff', headColor: '#e0eeff', hairColor: '#88aadd', pantsColor: '#7799cc', premium: false, price: 0, rarity: 'rare' },
 ];
 
 export const DAILY_REWARDS = [10, 25, 50, 75, 100, 150, 200];
