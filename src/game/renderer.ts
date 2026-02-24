@@ -770,6 +770,22 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, p: Player, skin: Skin)
 // ===== ROBOT =====
 
 export function drawRobot(ctx: CanvasRenderingContext2D, r: Robot) {
+  // Try sprite-based rendering
+  const robotFrame = Math.floor(r.frame / 15) % 4;
+  const flipX = r.vx < 0;
+  const spriteDrawn = spriteManager.drawFrame(ctx, 'robot', robotFrame, r.x - 4, r.y - 4, 32, 32, flipX);
+  if (spriteDrawn) {
+    // Shadow
+    ctx.fillStyle = '#000000';
+    ctx.globalAlpha = 0.25;
+    ctx.beginPath();
+    ctx.ellipse(r.x + 12, r.y + 24, 12, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    return;
+  }
+
+  // Fallback
   const facing = r.vx > 0 ? 1 : -1;
 
   // Shadow
