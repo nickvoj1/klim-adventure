@@ -886,6 +886,17 @@ export function drawBullet(ctx: CanvasRenderingContext2D, b: Bullet) {
 
 export function drawCoin(ctx: CanvasRenderingContext2D, c: Coin, tick: number) {
   const bob = Math.sin(tick * 0.05 + c.bobOffset) * 3;
+
+  // Try sprite-based coin rendering
+  const coinFrame = Math.floor(tick / 10) % 4;
+  const spriteDrawn = spriteManager.drawFrame(ctx, 'coin', coinFrame, c.x - 2, c.y - 2 + bob, 20, 20);
+  if (spriteDrawn) {
+    // Add glow
+    drawGlow(ctx, c.x + 8, c.y + 8 + bob, 16, '#ffcc00', 0.1);
+    return;
+  }
+
+  // Fallback
   const cx = c.x + 8;
   const cy = c.y + 8 + bob;
   const stretch = Math.abs(Math.sin(tick * 0.03 + c.bobOffset));
