@@ -472,12 +472,13 @@ export class GameEngine {
     for (const r of this.robots) {
       if (!r.alive) continue;
       r.x += r.vx;
+      // Keep robot within patrol bounds AND on platforms
       if (r.x <= r.patrolStart || r.x >= r.patrolEnd) r.vx *= -1;
       r.frame++;
 
       r.shootTimer--;
       if (r.shootTimer <= 0) {
-        r.shootTimer = 120;
+        r.shootTimer = 100 + Math.floor(Math.random() * 40); // Slight variation
         const dir = this.player.x > r.x ? 1 : -1;
         this.bullets.push({
           x: r.x + (dir > 0 ? r.w : -8),
