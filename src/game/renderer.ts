@@ -624,8 +624,8 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, p: Player, skin: Skin)
   ctx.scale(dir, 1);
 
   // Attack pose modifications
-  const isAttacking = p.attacking !== 'none' && p.attackTimer > 0;
-  const attackPhase = isAttacking ? p.attackTimer / (p.attacking === 'special' ? 24 : p.attacking === 'kick' ? 16 : 12) : 0;
+  const isAttackingFallback = p.attacking !== 'none' && p.attackTimer > 0;
+  const attackPhase = isAttackingFallback ? p.attackTimer / (p.attacking === 'special' ? 24 : p.attacking === 'kick' ? 16 : 12) : 0;
 
   if (p.crouching) {
     // Crouching pose with detail
