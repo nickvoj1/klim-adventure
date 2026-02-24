@@ -751,7 +751,7 @@ export class GameEngine {
     // Platforms
     for (const p of this.platforms) {
       if (p.x + p.w > cam - 50 && p.x < cam + CANVAS_WIDTH + 50) {
-        drawPlatform(ctx, p, this.levelData.groundColor);
+        drawPlatform(ctx, p, this.levelData.groundColor, this.levelData.world);
       }
     }
 
