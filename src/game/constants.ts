@@ -83,6 +83,7 @@ export const SKINS: Skin[] = [
   { name: 'Deep Sea King', bodyColor: '#003366', headColor: '#00ccaa', hairColor: '#001144', pantsColor: '#004488', premium: true, price: 800, rarity: 'epic' },
   { name: 'Frost Wraith', bodyColor: '#b0d0ff', headColor: '#e0eeff', hairColor: '#88aadd', pantsColor: '#7799cc', premium: false, price: 0, rarity: 'rare' },
   { name: 'Toxic Haze', bodyColor: '#33cc22', headColor: '#ccff44', hairColor: '#118800', pantsColor: '#226611', premium: true, price: 600, rarity: 'epic' },
+  { name: 'Midnight DJ', bodyColor: '#1a0a2e', headColor: '#dd88ff', hairColor: '#ff00aa', pantsColor: '#0d0520', premium: false, price: 0, rarity: 'uncommon' },
 ];
 
 export const DAILY_REWARDS = [10, 25, 50, 75, 100, 150, 200];
@@ -135,7 +136,7 @@ export const DEFAULT_PROGRESS = (): import('./types').GameProgress => ({
   lives: 3,
   currentLevel: 0,
   unlockedLevels: 1,
-  unlockedSkins: Array(45).fill(false).map((_, i) => i === 0),
+  unlockedSkins: Array(46).fill(false).map((_, i) => i === 0),
   equippedSkin: 0,
   dailyStreak: 0,
   lastDailyReward: 0,
