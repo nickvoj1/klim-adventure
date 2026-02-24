@@ -696,7 +696,7 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, p: Player, skin: Skin)
       // Back arm
       pixelRect(ctx, -2, 16, 4, 6, skin.bodyColor);
       pixelRect(ctx, -2, 20, 4, 2, skin.headColor);
-    } else if (isAttacking && p.attacking === 'kick') {
+    } else if (isAttackingFallback && p.attacking === 'kick') {
       // Normal arms
       pixelRect(ctx, -2, 14, 4, 7, skin.bodyColor);
       pixelRect(ctx, 16, 14, 4, 7, skin.bodyColor);
