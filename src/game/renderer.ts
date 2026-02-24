@@ -169,6 +169,54 @@ export function drawBackground(ctx: CanvasRenderingContext2D, level: LevelData, 
   }
 }
 
+// Foreground effects drawn ON TOP of sprite backgrounds
+function drawDesertForegroundEffects(ctx: CanvasRenderingContext2D, cameraX: number, tick: number) {
+  // Sand particles blowing in wind
+  for (let i = 0; i < 20; i++) {
+    const px = (i * 97 + tick * 0.8 + cameraX * 0.3) % CANVAS_WIDTH;
+    const py = 320 + Math.sin(tick * 0.025 + i * 2) * 30 + (i % 5) * 8;
+    const alpha = 0.08 + Math.sin(tick * 0.01 + i) * 0.06;
+    ctx.fillStyle = '#c8964a';
+    ctx.globalAlpha = alpha;
+    ctx.fillRect(px, py, 3 - (i % 2), 1);
+  }
+  ctx.globalAlpha = 1;
+
+  // Heat haze shimmer
+  ctx.globalAlpha = 0.03;
+  ctx.fillStyle = '#ffaa66';
+  for (let i = 0; i < 8; i++) {
+    const hx = (i * 120 + tick * 0.3) % CANVAS_WIDTH;
+    const hy = 330 + Math.sin(tick * 0.04 + i * 1.5) * 8;
+    ctx.fillRect(hx, hy, 40, 1);
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawJungleForegroundEffects(ctx: CanvasRenderingContext2D, cameraX: number, tick: number) {
+  // Fireflies with trails
+  for (let i = 0; i < 12; i++) {
+    const fx = (i * 110 + Math.sin(tick * 0.008 + i * 2.5) * 30 - cameraX * 0.08 + 2000) % CANVAS_WIDTH;
+    const fy = 180 + Math.sin(tick * 0.012 + i * 1.8) * 60 + i * 5;
+    const brightness = (Math.sin(tick * 0.035 + i * 1.5) + 1) * 0.5;
+    if (brightness > 0.3) {
+      drawGlow(ctx, fx, fy, 10, '#aaffaa', brightness * 0.12);
+      ctx.fillStyle = '#ccffcc';
+      ctx.globalAlpha = brightness;
+      ctx.fillRect(fx - 1, fy - 1, 2, 2);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // Ground-level mist
+  ctx.globalAlpha = 0.06;
+  for (let i = 0; i < 6; i++) {
+    const mx = (i * 200 - cameraX * 0.2 + tick * 0.1 + 3000) % (CANVAS_WIDTH + 200) - 100;
+    drawGlow(ctx, mx, 380, 60, '#88ccaa', 0.08);
+  }
+  ctx.globalAlpha = 1;
+}
+
 function drawDesertBackground(ctx: CanvasRenderingContext2D, cameraX: number, tick: number) {
   // Distant mountains with gradient
   for (let i = 0; i < 5; i++) {
