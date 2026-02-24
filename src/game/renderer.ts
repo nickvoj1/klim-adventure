@@ -56,6 +56,27 @@ function updateAndDrawParticles(ctx: CanvasRenderingContext2D) {
 
 export function drawBackground(ctx: CanvasRenderingContext2D, level: LevelData, cameraX: number, tick: number) {
   const world = level.world;
+
+  // Try sprite-based background first
+  const bgKey = world === 'Jungle' ? 'jungleBg' : 'desertBg';
+  const bgSprite = spriteManager.get(bgKey);
+  if (bgSprite) {
+    // Parallax scrolling with the background image
+    const bgWidth = CANVAS_WIDTH * 2;
+    const parallaxX = -(cameraX * 0.15) % bgWidth;
+    ctx.drawImage(bgSprite.image, parallaxX, 0, bgWidth, CANVAS_HEIGHT);
+    ctx.drawImage(bgSprite.image, parallaxX + bgWidth, 0, bgWidth, CANVAS_HEIGHT);
+    
+    // Still draw foreground parallax elements over the background
+    if (world === 'Jungle') {
+      drawJungleForegroundEffects(ctx, cameraX, tick);
+    } else {
+      drawDesertForegroundEffects(ctx, cameraX, tick);
+    }
+    return;
+  }
+
+  // Fallback to programmatic background
   const grad = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
 
   if (world === 'Jungle') {
