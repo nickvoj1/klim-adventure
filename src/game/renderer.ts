@@ -1,5 +1,6 @@
 import { Player, Robot, Bullet, Coin, Chest, Spike, MovingSpike, Bat, HeartPickup, Flag, Platform, LevelData, Skin } from './types';
 import { CANVAS_WIDTH, CANVAS_HEIGHT } from './constants';
+import { spriteManager } from './sprites';
 
 // ===== UTILITIES =====
 
@@ -55,6 +56,27 @@ function updateAndDrawParticles(ctx: CanvasRenderingContext2D) {
 
 export function drawBackground(ctx: CanvasRenderingContext2D, level: LevelData, cameraX: number, tick: number) {
   const world = level.world;
+
+  // Try sprite-based background first
+  const bgKey = world === 'Jungle' ? 'jungleBg' : 'desertBg';
+  const bgSprite = spriteManager.get(bgKey);
+  if (bgSprite) {
+    // Parallax scrolling with the background image
+    const bgWidth = CANVAS_WIDTH * 2;
+    const parallaxX = -(cameraX * 0.15) % bgWidth;
+    ctx.drawImage(bgSprite.image, parallaxX, 0, bgWidth, CANVAS_HEIGHT);
+    ctx.drawImage(bgSprite.image, parallaxX + bgWidth, 0, bgWidth, CANVAS_HEIGHT);
+    
+    // Still draw foreground parallax elements over the background
+    if (world === 'Jungle') {
+      drawJungleForegroundEffects(ctx, cameraX, tick);
+    } else {
+      drawDesertForegroundEffects(ctx, cameraX, tick);
+    }
+    return;
+  }
+
+  // Fallback to programmatic background
   const grad = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
 
   if (world === 'Jungle') {
@@ -145,6 +167,54 @@ export function drawBackground(ctx: CanvasRenderingContext2D, level: LevelData, 
   } else {
     drawDesertBackground(ctx, cameraX, tick);
   }
+}
+
+// Foreground effects drawn ON TOP of sprite backgrounds
+function drawDesertForegroundEffects(ctx: CanvasRenderingContext2D, cameraX: number, tick: number) {
+  // Sand particles blowing in wind
+  for (let i = 0; i < 20; i++) {
+    const px = (i * 97 + tick * 0.8 + cameraX * 0.3) % CANVAS_WIDTH;
+    const py = 320 + Math.sin(tick * 0.025 + i * 2) * 30 + (i % 5) * 8;
+    const alpha = 0.08 + Math.sin(tick * 0.01 + i) * 0.06;
+    ctx.fillStyle = '#c8964a';
+    ctx.globalAlpha = alpha;
+    ctx.fillRect(px, py, 3 - (i % 2), 1);
+  }
+  ctx.globalAlpha = 1;
+
+  // Heat haze shimmer
+  ctx.globalAlpha = 0.03;
+  ctx.fillStyle = '#ffaa66';
+  for (let i = 0; i < 8; i++) {
+    const hx = (i * 120 + tick * 0.3) % CANVAS_WIDTH;
+    const hy = 330 + Math.sin(tick * 0.04 + i * 1.5) * 8;
+    ctx.fillRect(hx, hy, 40, 1);
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawJungleForegroundEffects(ctx: CanvasRenderingContext2D, cameraX: number, tick: number) {
+  // Fireflies with trails
+  for (let i = 0; i < 12; i++) {
+    const fx = (i * 110 + Math.sin(tick * 0.008 + i * 2.5) * 30 - cameraX * 0.08 + 2000) % CANVAS_WIDTH;
+    const fy = 180 + Math.sin(tick * 0.012 + i * 1.8) * 60 + i * 5;
+    const brightness = (Math.sin(tick * 0.035 + i * 1.5) + 1) * 0.5;
+    if (brightness > 0.3) {
+      drawGlow(ctx, fx, fy, 10, '#aaffaa', brightness * 0.12);
+      ctx.fillStyle = '#ccffcc';
+      ctx.globalAlpha = brightness;
+      ctx.fillRect(fx - 1, fy - 1, 2, 2);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // Ground-level mist
+  ctx.globalAlpha = 0.06;
+  for (let i = 0; i < 6; i++) {
+    const mx = (i * 200 - cameraX * 0.2 + tick * 0.1 + 3000) % (CANVAS_WIDTH + 200) - 100;
+    drawGlow(ctx, mx, 380, 60, '#88ccaa', 0.08);
+  }
+  ctx.globalAlpha = 1;
 }
 
 function drawDesertBackground(ctx: CanvasRenderingContext2D, cameraX: number, tick: number) {
@@ -387,7 +457,29 @@ function drawDune(ctx: CanvasRenderingContext2D, x: number, y: number, w: number
 
 // ===== PLATFORMS =====
 
-export function drawPlatform(ctx: CanvasRenderingContext2D, p: Platform, color: string) {
+export function drawPlatform(ctx: CanvasRenderingContext2D, p: Platform, color: string, world?: string) {
+  // Try sprite-based tile rendering
+  const tileKey = world === 'Jungle' ? 'jungleTiles' : 'desertTiles';
+  const tileSheet = spriteManager.get(tileKey);
+  if (tileSheet) {
+    // Tile the platform with the tileset image (use a repeating section)
+    const tileSize = 32;
+    for (let tx = 0; tx < p.w; tx += tileSize) {
+      const drawW = Math.min(tileSize, p.w - tx);
+      // Use middle section of tileset for platform tiles (row 1, roughly)
+      const srcX = (world === 'Jungle') ? 0 : 256;
+      const srcY = (world === 'Jungle') ? 200 : 64;
+      spriteManager.drawTile(ctx, tileKey, srcX, srcY, 128, 128, p.x + tx, p.y, drawW, p.h);
+    }
+    // Top surface highlight
+    ctx.fillStyle = world === 'Jungle' ? '#44aa44' : '#ddbb77';
+    ctx.globalAlpha = 0.3;
+    ctx.fillRect(p.x, p.y, p.w, 3);
+    ctx.globalAlpha = 1;
+    return;
+  }
+
+  // Fallback to programmatic drawing
   const darker = adjustColor(color, -30);
   const lighter = adjustColor(color, 40);
   const darkest = adjustColor(color, -60);
@@ -467,6 +559,48 @@ export function drawPlatform(ctx: CanvasRenderingContext2D, p: Platform, color: 
 // ===== PLAYER =====
 
 export function drawPlayer(ctx: CanvasRenderingContext2D, p: Player, skin: Skin) {
+  // Try sprite-based rendering
+  const isAttacking = p.attacking !== 'none' && p.attackTimer > 0;
+  let frameIndex = 0;
+  if (isAttacking) {
+    frameIndex = p.attacking === 'punch' ? 6 : 7; // punch=frame 6, kick/special=frame 7
+  } else if (!p.onGround) {
+    frameIndex = 5; // jump
+  } else if (Math.abs(p.vx) > 0.5) {
+    frameIndex = 1 + (p.frame % 4); // walk cycle frames 1-4
+  } else {
+    frameIndex = 0; // idle
+  }
+
+  const flipX = p.facing === 'left';
+  const spriteDrawn = spriteManager.drawFrame(
+    ctx, 'player', frameIndex,
+    p.x - 6, p.y - 4, 32, 36, // Slightly larger than hitbox for visual appeal
+    flipX
+  );
+
+  if (spriteDrawn) {
+    // Still draw attack effects and special aura via programmatic overlay
+    if (isAttacking && p.attacking === 'special') {
+      const attackPhase = p.attackTimer / 24;
+      ctx.globalAlpha = attackPhase * 0.3;
+      ctx.fillStyle = '#44ddff';
+      ctx.fillRect(p.x - 6, p.y - 4, 32, 40);
+      ctx.globalAlpha = 1;
+    }
+    // Ground shadow
+    if (p.onGround) {
+      ctx.fillStyle = '#000000';
+      ctx.globalAlpha = 0.2;
+      ctx.beginPath();
+      ctx.ellipse(p.x + p.w / 2, p.y + p.h + 1, p.w * 0.6, 3, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    return;
+  }
+
+  // Fallback to programmatic drawing
   const dir = p.facing === 'right' ? 1 : -1;
   const bx = p.x + (dir === -1 ? p.w : 0);
   const bodyDark = adjustColor(skin.bodyColor, -40);
@@ -490,8 +624,8 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, p: Player, skin: Skin)
   ctx.scale(dir, 1);
 
   // Attack pose modifications
-  const isAttacking = p.attacking !== 'none' && p.attackTimer > 0;
-  const attackPhase = isAttacking ? p.attackTimer / (p.attacking === 'special' ? 24 : p.attacking === 'kick' ? 16 : 12) : 0;
+  const isAttackingFallback = p.attacking !== 'none' && p.attackTimer > 0;
+  const attackPhase = isAttackingFallback ? p.attackTimer / (p.attacking === 'special' ? 24 : p.attacking === 'kick' ? 16 : 12) : 0;
 
   if (p.crouching) {
     // Crouching pose with detail
@@ -553,7 +687,7 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, p: Player, skin: Skin)
     pixelRect(ctx, 7, 20, 4, 1, '#ccaa00'); // buckle
 
     // Arms with attack poses
-    if (isAttacking && p.attacking === 'punch') {
+    if (isAttackingFallback && p.attacking === 'punch') {
       // Punch arm extended
       const ext = (1 - attackPhase) * 12;
       pixelRect(ctx, 16, 14, 4 + ext, 6, skin.bodyColor);
@@ -562,7 +696,7 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, p: Player, skin: Skin)
       // Back arm
       pixelRect(ctx, -2, 16, 4, 6, skin.bodyColor);
       pixelRect(ctx, -2, 20, 4, 2, skin.headColor);
-    } else if (isAttacking && p.attacking === 'kick') {
+    } else if (isAttackingFallback && p.attacking === 'kick') {
       // Normal arms
       pixelRect(ctx, -2, 14, 4, 7, skin.bodyColor);
       pixelRect(ctx, 16, 14, 4, 7, skin.bodyColor);
@@ -591,7 +725,7 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, p: Player, skin: Skin)
     pixelRect(ctx, 12, 23, 3, 1, adjustColor(skin.pantsColor, 20));
 
     // Feet with lace detail
-    if (isAttacking && p.attacking === 'kick') {
+    if (isAttackingFallback && p.attacking === 'kick') {
       // Kick leg extended
       const kickExt = (1 - attackPhase) * 14;
       pixelRect(ctx, 10 + kickExt, 27, 8, 5, '#3a2211');
@@ -622,7 +756,7 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, p: Player, skin: Skin)
     }
 
     // Special attack aura
-    if (isAttacking && p.attacking === 'special') {
+    if (isAttackingFallback && p.attacking === 'special') {
       ctx.globalAlpha = attackPhase * 0.3;
       ctx.fillStyle = '#44ddff';
       ctx.fillRect(-6, -4, 30, 40);
@@ -636,6 +770,22 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, p: Player, skin: Skin)
 // ===== ROBOT =====
 
 export function drawRobot(ctx: CanvasRenderingContext2D, r: Robot) {
+  // Try sprite-based rendering
+  const robotFrame = Math.floor(r.frame / 15) % 4;
+  const flipX = r.vx < 0;
+  const spriteDrawn = spriteManager.drawFrame(ctx, 'robot', robotFrame, r.x - 4, r.y - 4, 32, 32, flipX);
+  if (spriteDrawn) {
+    // Shadow
+    ctx.fillStyle = '#000000';
+    ctx.globalAlpha = 0.25;
+    ctx.beginPath();
+    ctx.ellipse(r.x + 12, r.y + 24, 12, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    return;
+  }
+
+  // Fallback
   const facing = r.vx > 0 ? 1 : -1;
 
   // Shadow
@@ -736,6 +886,17 @@ export function drawBullet(ctx: CanvasRenderingContext2D, b: Bullet) {
 
 export function drawCoin(ctx: CanvasRenderingContext2D, c: Coin, tick: number) {
   const bob = Math.sin(tick * 0.05 + c.bobOffset) * 3;
+
+  // Try sprite-based coin rendering
+  const coinFrame = Math.floor(tick / 10) % 4;
+  const spriteDrawn = spriteManager.drawFrame(ctx, 'coin', coinFrame, c.x - 2, c.y - 2 + bob, 20, 20);
+  if (spriteDrawn) {
+    // Add glow
+    drawGlow(ctx, c.x + 8, c.y + 8 + bob, 16, '#ffcc00', 0.1);
+    return;
+  }
+
+  // Fallback
   const cx = c.x + 8;
   const cy = c.y + 8 + bob;
   const stretch = Math.abs(Math.sin(tick * 0.03 + c.bobOffset));
@@ -1149,6 +1310,22 @@ export function drawMovingSpike(ctx: CanvasRenderingContext2D, ms: MovingSpike, 
 // ===== BAT =====
 
 export function drawBat(ctx: CanvasRenderingContext2D, b: Bat, tick: number) {
+  // Try sprite-based rendering
+  const batFrame = Math.floor(b.frame / 8) % 4;
+  const flipX = b.vx < 0;
+  const spriteDrawn = spriteManager.drawFrame(ctx, 'bat', batFrame, b.x - 6, b.y - 6, 32, 28, flipX);
+  if (spriteDrawn) {
+    // Shadow below
+    ctx.fillStyle = '#000000';
+    ctx.globalAlpha = 0.1;
+    ctx.beginPath();
+    ctx.ellipse(b.x + b.w / 2, b.y + b.h + 20, 10, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    return;
+  }
+
+  // Fallback
   const wingFlap = Math.sin(b.frame * 0.3) * 10;
   const facing = b.vx > 0 ? 1 : -1;
 

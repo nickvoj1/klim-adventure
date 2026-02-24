@@ -4,6 +4,7 @@ import { generateLevel } from './levelgen';
 import { playSound } from './audio';
 import { drawBackground, drawPlatform, drawPlayer, drawRobot, drawBullet, drawCoin, drawSpike, drawMovingSpike, drawBat, drawHeart, drawChest, drawFlag } from './renderer';
 import { drawBoss, drawBossName } from './boss-renderer';
+import { spriteManager } from './sprites';
 
 export interface EngineCallbacks {
   onLevelComplete: (coinsCollected: number, stats: LevelStats) => void;
@@ -141,6 +142,10 @@ export class GameEngine {
   start() {
     this.running = true;
     this.setupInput();
+    // Load sprites in background - game still works with fallback
+    spriteManager.loadAll().then(() => {
+      console.log('Sprites loaded successfully');
+    });
     this.loop();
   }
 
@@ -746,7 +751,7 @@ export class GameEngine {
     // Platforms
     for (const p of this.platforms) {
       if (p.x + p.w > cam - 50 && p.x < cam + CANVAS_WIDTH + 50) {
-        drawPlatform(ctx, p, this.levelData.groundColor);
+        drawPlatform(ctx, p, this.levelData.groundColor, this.levelData.world);
       }
     }
 
