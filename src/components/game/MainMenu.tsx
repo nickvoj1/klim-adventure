@@ -18,10 +18,23 @@ interface MainMenuProps {
 }
 
 const MainMenu: React.FC<MainMenuProps> = ({
-  onPlay, onShop, onSkins, onAchievements, onLeaderboard, onAuth, onLogout,
+  onPlay, onShop, onSkins, onAchievements, onLeaderboard, onAuth, onLogout, onDevMode,
   totalCoins, hasDailyReward, unclaimedAchievements, isLoggedIn, displayName,
 }) => {
   const [selected, setSelected] = useState(0);
+  const tapCountRef = React.useRef(0);
+  const tapTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleTitleTap = () => {
+    tapCountRef.current += 1;
+    if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
+    if (tapCountRef.current >= 3) {
+      tapCountRef.current = 0;
+      onDevMode?.();
+    } else {
+      tapTimerRef.current = setTimeout(() => { tapCountRef.current = 0; }, 600);
+    }
+  };
   const buttons = [
     { label: '▶ PLAY', action: onPlay, notify: false },
     { label: '🏆 LEADERBOARD', action: onLeaderboard, notify: false },
