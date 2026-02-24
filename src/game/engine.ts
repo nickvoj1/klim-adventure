@@ -142,6 +142,10 @@ export class GameEngine {
   start() {
     this.running = true;
     this.setupInput();
+    // Load sprites in background - game still works with fallback
+    spriteManager.loadAll().then(() => {
+      console.log('Sprites loaded successfully');
+    });
     this.loop();
   }
 
