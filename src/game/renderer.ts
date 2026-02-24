@@ -462,19 +462,17 @@ export function drawPlatform(ctx: CanvasRenderingContext2D, p: Platform, color: 
   const tileKey = world === 'Jungle' ? 'jungleTiles' : 'desertTiles';
   const tileSheet = spriteManager.get(tileKey);
   if (tileSheet) {
-    // Tile the platform with the tileset image (use a repeating section)
+    // Tile the platform with the full tileset image (single-frame)
     const tileSize = 32;
     for (let tx = 0; tx < p.w; tx += tileSize) {
       const drawW = Math.min(tileSize, p.w - tx);
-      // Use middle section of tileset for platform tiles (row 1, roughly)
-      const srcX = (world === 'Jungle') ? 0 : 256;
-      const srcY = (world === 'Jungle') ? 200 : 64;
-      spriteManager.drawTile(ctx, tileKey, srcX, srcY, 128, 128, p.x + tx, p.y, drawW, p.h);
+      // Use center section of the tileset for platform fill
+      spriteManager.drawTile(ctx, tileKey, 128, 128, 256, 256, p.x + tx, p.y, drawW, p.h);
     }
     // Top surface highlight
     ctx.fillStyle = world === 'Jungle' ? '#44aa44' : '#ddbb77';
-    ctx.globalAlpha = 0.3;
-    ctx.fillRect(p.x, p.y, p.w, 3);
+    ctx.globalAlpha = 0.25;
+    ctx.fillRect(p.x, p.y, p.w, 2);
     ctx.globalAlpha = 1;
     return;
   }
