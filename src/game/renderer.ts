@@ -1310,6 +1310,22 @@ export function drawMovingSpike(ctx: CanvasRenderingContext2D, ms: MovingSpike, 
 // ===== BAT =====
 
 export function drawBat(ctx: CanvasRenderingContext2D, b: Bat, tick: number) {
+  // Try sprite-based rendering
+  const batFrame = Math.floor(b.frame / 8) % 4;
+  const flipX = b.vx < 0;
+  const spriteDrawn = spriteManager.drawFrame(ctx, 'bat', batFrame, b.x - 6, b.y - 6, 32, 28, flipX);
+  if (spriteDrawn) {
+    // Shadow below
+    ctx.fillStyle = '#000000';
+    ctx.globalAlpha = 0.1;
+    ctx.beginPath();
+    ctx.ellipse(b.x + b.w / 2, b.y + b.h + 20, 10, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    return;
+  }
+
+  // Fallback
   const wingFlap = Math.sin(b.frame * 0.3) * 10;
   const facing = b.vx > 0 ? 1 : -1;
 
