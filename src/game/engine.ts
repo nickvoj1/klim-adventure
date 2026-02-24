@@ -340,15 +340,18 @@ export class GameEngine {
     p.y += p.vy;
     this.resolveCollisionY();
 
-    // Animation
+    // Animation - smoother walk cycle with speed-based timing
     if (Math.abs(p.vx) > 0.5 && p.onGround) {
       p.frameTimer++;
-      if (p.frameTimer > 6) { p.frame = (p.frame + 1) % 4; p.frameTimer = 0; }
+      const animSpeed = Math.abs(p.vx) > 4 ? 4 : 5; // Faster anim when sprinting
+      if (p.frameTimer > animSpeed) { p.frame = (p.frame + 1) % 4; p.frameTimer = 0; }
     } else if (!p.onGround) {
-      p.frame = 1;
+      // Distinguish jump vs fall
+      p.frame = p.vy < -2 ? 1 : (p.vy > 2 ? 2 : 1);
     } else {
-      p.frame = 0;
-      p.frameTimer = 0;
+      // Idle breathing effect via slow frame cycle
+      p.frameTimer++;
+      if (p.frameTimer > 30) { p.frame = p.frame === 0 ? 3 : 0; p.frameTimer = 0; }
     }
 
     // Fall death (faster detection)
