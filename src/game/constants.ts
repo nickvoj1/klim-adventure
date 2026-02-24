@@ -79,6 +79,7 @@ export const SKINS: Skin[] = [
   { name: 'Nyan Runner', bodyColor: '#ff6699', headColor: '#ffaacc', hairColor: '#ffee00', pantsColor: '#6699ff', premium: true, price: 1000, rarity: 'legendary' },
   { name: 'Mog Master', bodyColor: '#0a4444', headColor: '#33aaaa', hairColor: '#003333', pantsColor: '#004444', premium: true, price: 1000, rarity: 'legendary' },
   { name: 'Cyber Phantom', bodyColor: '#0d0d2b', headColor: '#00ffcc', hairColor: '#ff00ff', pantsColor: '#1a0033', premium: true, price: 1500, rarity: 'legendary' },
+  { name: 'Solar Flare', bodyColor: '#ff4400', headColor: '#ffdd00', hairColor: '#ff8800', pantsColor: '#cc2200', premium: true, price: 1200, rarity: 'legendary' },
 ];
 
 export const DAILY_REWARDS = [10, 25, 50, 75, 100, 150, 200];
