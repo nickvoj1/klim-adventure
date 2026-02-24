@@ -67,6 +67,11 @@ export function drawBackground(ctx: CanvasRenderingContext2D, level: LevelData, 
     ctx.drawImage(bgSprite.image, parallaxX, 0, bgWidth, CANVAS_HEIGHT);
     ctx.drawImage(bgSprite.image, parallaxX + bgWidth, 0, bgWidth, CANVAS_HEIGHT);
     
+    // Grid overlay (subtle, stylish)
+    drawGridOverlay(ctx, cameraX, tick);
+    // Atmospheric gradient wash
+    drawAtmosphereOverlay(ctx, world, tick);
+
     // Still draw foreground parallax elements over the background
     if (world === 'Jungle') {
       drawJungleForegroundEffects(ctx, cameraX, tick);
