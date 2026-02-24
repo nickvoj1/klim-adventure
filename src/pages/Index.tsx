@@ -242,6 +242,7 @@ const Index = () => {
   }, []);
 
   const handleDevMode = useCallback(() => {
+    playSound('devmode');
     setProgress(p => ({
       ...p,
       totalCoins: 9999,
