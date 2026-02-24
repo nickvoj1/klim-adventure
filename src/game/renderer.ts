@@ -756,7 +756,7 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, p: Player, skin: Skin)
     }
 
     // Special attack aura
-    if (isAttacking && p.attacking === 'special') {
+    if (isAttackingFallback && p.attacking === 'special') {
       ctx.globalAlpha = attackPhase * 0.3;
       ctx.fillStyle = '#44ddff';
       ctx.fillRect(-6, -4, 30, 40);
