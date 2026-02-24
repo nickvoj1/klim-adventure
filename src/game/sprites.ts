@@ -97,6 +97,11 @@ class SpriteManager {
   get(key: string): SpriteSheet | null {
     const sprite = this.sprites.get(key);
     if (!sprite || !sprite.loaded) return null;
+    // Only return sprites for backgrounds and tiles (single-frame images)
+    // Animated entity sprites (player, robot, bat, coin) use programmatic rendering
+    // because AI-generated frames aren't pixel-perfect grid-aligned
+    const animatedEntities = ['player', 'robot', 'bat', 'coin', 'items'];
+    if (animatedEntities.includes(key)) return null;
     return sprite;
   }
 
