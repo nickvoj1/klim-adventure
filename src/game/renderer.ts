@@ -725,7 +725,7 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, p: Player, skin: Skin)
     pixelRect(ctx, 12, 23, 3, 1, adjustColor(skin.pantsColor, 20));
 
     // Feet with lace detail
-    if (isAttacking && p.attacking === 'kick') {
+    if (isAttackingFallback && p.attacking === 'kick') {
       // Kick leg extended
       const kickExt = (1 - attackPhase) * 14;
       pixelRect(ctx, 10 + kickExt, 27, 8, 5, '#3a2211');
