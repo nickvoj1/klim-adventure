@@ -84,6 +84,7 @@ export const SKINS: Skin[] = [
   { name: 'Frost Wraith', bodyColor: '#b0d0ff', headColor: '#e0eeff', hairColor: '#88aadd', pantsColor: '#7799cc', premium: false, price: 0, rarity: 'rare' },
   { name: 'Toxic Haze', bodyColor: '#33cc22', headColor: '#ccff44', hairColor: '#118800', pantsColor: '#226611', premium: true, price: 600, rarity: 'epic' },
   { name: 'Midnight DJ', bodyColor: '#1a0a2e', headColor: '#dd88ff', hairColor: '#ff00aa', pantsColor: '#0d0520', premium: false, price: 0, rarity: 'uncommon' },
+  { name: 'Sand Pharaoh', bodyColor: '#ddaa33', headColor: '#ffe088', hairColor: '#0a0a0a', pantsColor: '#bb8800', premium: true, price: 900, rarity: 'epic' },
 ];
 
 export const DAILY_REWARDS = [10, 25, 50, 75, 100, 150, 200];
