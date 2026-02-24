@@ -131,7 +131,7 @@ export const DEFAULT_PROGRESS = (): import('./types').GameProgress => ({
   lives: 3,
   currentLevel: 0,
   unlockedLevels: 1,
-  unlockedSkins: Array(40).fill(false).map((_, i) => i === 0),
+  unlockedSkins: Array(41).fill(false).map((_, i) => i === 0),
   equippedSkin: 0,
   dailyStreak: 0,
   lastDailyReward: 0,
