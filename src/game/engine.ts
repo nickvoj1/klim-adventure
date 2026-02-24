@@ -632,7 +632,9 @@ export class GameEngine {
   private updateBats() {
     for (const b of this.bats) {
       if (!b.alive) continue;
-      b.x += b.vx;
+      // Smoother bat movement with slight speed variation
+      const batSpeed = 0.8 + Math.sin(b.frame * 0.01) * 0.3;
+      b.x += b.vx * batSpeed;
       if (b.x <= b.patrolStart || b.x >= b.patrolEnd) b.vx *= -1;
       b.frame++;
       b.y = b.baseY + Math.sin(b.frame * b.frequency) * b.amplitude;
