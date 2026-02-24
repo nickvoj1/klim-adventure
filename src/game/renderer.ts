@@ -654,25 +654,8 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, p: Player, skin: Skin)
       ctx.globalAlpha = 1;
     }
     return;
-  }
-    if (isAttacking && p.attacking === 'special') {
-      const attackPhase = p.attackTimer / 24;
-      ctx.globalAlpha = attackPhase * 0.3;
-      ctx.fillStyle = '#44ddff';
-      ctx.fillRect(p.x - 6, p.y - 4, 32, 40);
-      ctx.globalAlpha = 1;
-    }
-    // Ground shadow
-    if (p.onGround) {
-      ctx.fillStyle = '#000000';
-      ctx.globalAlpha = 0.2;
-      ctx.beginPath();
-      ctx.ellipse(p.x + p.w / 2, p.y + p.h + 1, p.w * 0.6, 3, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.globalAlpha = 1;
-    }
-    return;
-  }
+
+
 
   // Fallback to programmatic drawing
   const dir = p.facing === 'right' ? 1 : -1;
