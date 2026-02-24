@@ -29,18 +29,15 @@ export const LEVELS: LevelData[] = [
       plat(2050, 300, 96),
     ],
     coins: [
-      // Ground coins
       { x: 150, y: 340 }, { x: 180, y: 340 }, { x: 210, y: 340 },
       { x: 700, y: 340 }, { x: 730, y: 340 },
       { x: 1200, y: 340 }, { x: 1230, y: 340 }, { x: 1260, y: 340 },
       { x: 1750, y: 340 }, { x: 1780, y: 340 },
-      // Platform coins
       { x: 310, y: 252 }, { x: 340, y: 252 },
       { x: 530, y: 192 }, { x: 560, y: 192 },
       { x: 840, y: 232 }, { x: 870, y: 232 },
       { x: 1340, y: 212 }, { x: 1370, y: 212 },
       { x: 1530, y: 172 }, { x: 1560, y: 172 },
-      // Bonus coins high up
       { x: 420, y: 160 }, { x: 1100, y: 160 },
     ],
     robots: [
@@ -48,7 +45,8 @@ export const LEVELS: LevelData[] = [
       { x: 1400, y: 344, patrolRange: 120 },
     ],
     spikes: [
-      { x: 620, y: 360 }, { x: 652, y: 360 },
+      // On first ground (0-600), near the edge
+      { x: 540, y: 360 }, { x: 572, y: 360 },
     ],
     bats: [
       { x: 900, y: 200, patrolRange: 120, amplitude: 25, frequency: 0.025 },
@@ -80,7 +78,6 @@ export const LEVELS: LevelData[] = [
       ground(1650, 200),
       ground(1950, 300),
       ground(2350, 450),
-      // Elevated platforms
       plat(200, 280, 96),
       plat(420, 220, 80),
       plat(600, 260, 96),
@@ -93,7 +90,6 @@ export const LEVELS: LevelData[] = [
       plat(1850, 150, 80),
       plat(2100, 260, 96),
       plat(2250, 200, 80),
-      // Hidden platform for chest
       plat(1080, 100, 64),
     ],
     coins: [
@@ -104,7 +100,6 @@ export const LEVELS: LevelData[] = [
       { x: 1700, y: 340 }, { x: 1730, y: 340 },
       { x: 2000, y: 340 }, { x: 2030, y: 340 }, { x: 2060, y: 340 },
       { x: 2400, y: 340 }, { x: 2430, y: 340 }, { x: 2460, y: 340 },
-      // Platform coins
       { x: 230, y: 252 }, { x: 260, y: 252 },
       { x: 440, y: 192 }, { x: 470, y: 192 },
       { x: 630, y: 232 }, { x: 660, y: 232 },
@@ -120,18 +115,23 @@ export const LEVELS: LevelData[] = [
       { x: 2100, y: 344, patrolRange: 120 },
     ],
     spikes: [
-      { x: 430, y: 360 }, { x: 462, y: 360 },
-      { x: 810, y: 360 }, { x: 842, y: 360 },
-      { x: 1160, y: 360 }, { x: 1192, y: 360 },
-      { x: 1600, y: 360 },
-      { x: 1900, y: 360 }, { x: 1932, y: 360 },
+      // On ground (0-400)
+      { x: 330, y: 360 }, { x: 362, y: 360 },
+      // On ground (480-780)
+      { x: 700, y: 360 }, { x: 732, y: 360 },
+      // On ground (860-1110)
+      { x: 1000, y: 360 }, { x: 1032, y: 360 },
+      // On ground (1200-1550)
+      { x: 1480, y: 360 },
+      // On ground (1950-2250)
+      { x: 2180, y: 360 }, { x: 2212, y: 360 },
     ],
     bats: [
       { x: 600, y: 180, patrolRange: 100, amplitude: 30, frequency: 0.03 },
       { x: 1500, y: 160, patrolRange: 120, amplitude: 25, frequency: 0.035 },
     ],
     movingSpikes: [
-      { startX: 1150, startY: 360, endX: 1350, endY: 360, speed: 0.005 },
+      { startX: 1250, startY: 360, endX: 1450, endY: 360, speed: 0.005 },
     ],
     chests: [
       { x: 1096, y: 68, skinIndex: 2 },
@@ -195,11 +195,16 @@ export const LEVELS: LevelData[] = [
       { x: 2300, y: 344, patrolRange: 120 },
     ],
     spikes: [
-      { x: 380, y: 360 }, { x: 412, y: 360 },
-      { x: 710, y: 360 }, { x: 742, y: 360 },
-      { x: 1090, y: 360 }, { x: 1122, y: 360 },
-      { x: 1810, y: 360 }, { x: 1842, y: 360 },
-      { x: 2160, y: 360 }, { x: 2192, y: 360 },
+      // On ground (0-350)
+      { x: 280, y: 360 }, { x: 312, y: 360 },
+      // On ground (420-670)
+      { x: 600, y: 360 }, { x: 632, y: 360 },
+      // On ground (750-1050)
+      { x: 980, y: 360 }, { x: 1012, y: 360 },
+      // On ground (1420-1770)
+      { x: 1700, y: 360 }, { x: 1732, y: 360 },
+      // On ground (2200-2500)
+      { x: 2430, y: 360 }, { x: 2462, y: 360 },
     ],
     bats: [
       { x: 500, y: 150, patrolRange: 120, amplitude: 35, frequency: 0.03 },
@@ -208,7 +213,7 @@ export const LEVELS: LevelData[] = [
     ],
     movingSpikes: [
       { startX: 800, startY: 360, endX: 1000, endY: 360, speed: 0.006 },
-      { startX: 1800, startY: 360, endX: 1950, endY: 360, speed: 0.007 },
+      { startX: 1900, startY: 360, endX: 2050, endY: 360, speed: 0.007 },
     ],
     chests: [
       { x: 1060, y: 108, skinIndex: 3 },
@@ -277,13 +282,20 @@ export const LEVELS: LevelData[] = [
       { x: 2500, y: 344, patrolRange: 120 },
     ],
     spikes: [
-      { x: 340, y: 360 }, { x: 372, y: 360 },
-      { x: 620, y: 360 }, { x: 652, y: 360 },
-      { x: 960, y: 360 }, { x: 992, y: 360 },
-      { x: 1300, y: 360 }, { x: 1332, y: 360 },
-      { x: 1560, y: 360 },
-      { x: 1910, y: 360 }, { x: 1942, y: 360 },
-      { x: 2210, y: 360 }, { x: 2242, y: 360 },
+      // On ground (0-300)
+      { x: 230, y: 360 }, { x: 262, y: 360 },
+      // On ground (380-580)
+      { x: 510, y: 360 }, { x: 542, y: 360 },
+      // On ground (660-960)
+      { x: 890, y: 360 }, { x: 922, y: 360 },
+      // On ground (1000-1250)
+      { x: 1180, y: 360 }, { x: 1212, y: 360 },
+      // On ground (1600-1900)
+      { x: 1830, y: 360 },
+      // On ground (1950-2150)
+      { x: 2080, y: 360 }, { x: 2112, y: 360 },
+      // On ground (2250-2600)
+      { x: 2530, y: 360 }, { x: 2562, y: 360 },
     ],
     bats: [
       { x: 450, y: 130, patrolRange: 100, amplitude: 30, frequency: 0.035 },
@@ -291,9 +303,9 @@ export const LEVELS: LevelData[] = [
       { x: 2000, y: 150, patrolRange: 100, amplitude: 25, frequency: 0.04 },
     ],
     movingSpikes: [
-      { startX: 600, startY: 360, endX: 800, endY: 360, speed: 0.007 },
-      { startX: 1500, startY: 360, endX: 1700, endY: 360, speed: 0.006 },
-      { startX: 2100, startY: 280, endX: 2100, endY: 360, speed: 0.005 },
+      { startX: 700, startY: 360, endX: 900, endY: 360, speed: 0.007 },
+      { startX: 1650, startY: 360, endX: 1850, endY: 360, speed: 0.006 },
+      { startX: 2400, startY: 280, endX: 2400, endY: 360, speed: 0.005 },
     ],
     chests: [
       { x: 1260, y: 88, skinIndex: 4 },
@@ -368,14 +380,22 @@ export const LEVELS: LevelData[] = [
       { x: 2350, y: 344, patrolRange: 80 },
     ],
     spikes: [
-      { x: 310, y: 360 }, { x: 342, y: 360 },
-      { x: 580, y: 360 }, { x: 612, y: 360 },
-      { x: 910, y: 360 }, { x: 942, y: 360 },
-      { x: 1210, y: 360 }, { x: 1242, y: 360 },
-      { x: 1560, y: 360 }, { x: 1592, y: 360 },
-      { x: 1860, y: 360 }, { x: 1892, y: 360 },
-      { x: 2210, y: 360 }, { x: 2242, y: 360 },
-      { x: 2510, y: 360 }, { x: 2542, y: 360 },
+      // On ground (0-280)
+      { x: 210, y: 360 }, { x: 242, y: 360 },
+      // On ground (350-550)
+      { x: 480, y: 360 }, { x: 512, y: 360 },
+      // On ground (620-900)
+      { x: 830, y: 360 }, { x: 862, y: 360 },
+      // On ground (950-1150)
+      { x: 1080, y: 360 }, { x: 1112, y: 360 },
+      // On ground (1250-1550)
+      { x: 1470, y: 360 }, { x: 1502, y: 360 },
+      // On ground (1600-1780)
+      { x: 1720, y: 360 },
+      // On ground (1900-2180)
+      { x: 2110, y: 360 }, { x: 2142, y: 360 },
+      // On ground (2550-2850)
+      { x: 2780, y: 360 }, { x: 2812, y: 360 },
     ],
     bats: [
       { x: 400, y: 100, patrolRange: 100, amplitude: 35, frequency: 0.035 },
@@ -384,10 +404,10 @@ export const LEVELS: LevelData[] = [
       { x: 2200, y: 120, patrolRange: 80, amplitude: 25, frequency: 0.035 },
     ],
     movingSpikes: [
-      { startX: 500, startY: 360, endX: 700, endY: 360, speed: 0.007 },
-      { startX: 1200, startY: 360, endX: 1400, endY: 360, speed: 0.008 },
-      { startX: 1800, startY: 300, endX: 1800, endY: 360, speed: 0.006 },
-      { startX: 2400, startY: 360, endX: 2600, endY: 360, speed: 0.007 },
+      { startX: 660, startY: 360, endX: 860, endY: 360, speed: 0.007 },
+      { startX: 1300, startY: 360, endX: 1500, endY: 360, speed: 0.008 },
+      { startX: 1950, startY: 300, endX: 1950, endY: 360, speed: 0.006 },
+      { startX: 2600, startY: 360, endX: 2800, endY: 360, speed: 0.007 },
     ],
     chests: [
       { x: 1210, y: 68, skinIndex: 5 },
@@ -443,16 +463,19 @@ export const LEVELS: LevelData[] = [
       { x: 1900, y: 344, patrolRange: 120 },
     ],
     spikes: [
-      { x: 640, y: 360 }, { x: 672, y: 360 },
-      { x: 1100, y: 360 },
-      { x: 1660, y: 360 }, { x: 1692, y: 360 },
+      // On ground (0-600)
+      { x: 540, y: 360 }, { x: 572, y: 360 },
+      // On ground (1140-1640)
+      { x: 1550, y: 360 },
+      // On ground (1700-2200)
+      { x: 2100, y: 360 }, { x: 2132, y: 360 },
     ],
     bats: [
       { x: 700, y: 180, patrolRange: 120, amplitude: 30, frequency: 0.03 },
       { x: 1400, y: 160, patrolRange: 100, amplitude: 25, frequency: 0.035 },
     ],
     movingSpikes: [
-      { startX: 1100, startY: 360, endX: 1300, endY: 360, speed: 0.005 },
+      { startX: 1200, startY: 360, endX: 1400, endY: 360, speed: 0.005 },
     ],
     chests: [
       { x: 1020, y: 168, skinIndex: 6 },
@@ -516,18 +539,22 @@ export const LEVELS: LevelData[] = [
       { x: 2200, y: 344, patrolRange: 120 },
     ],
     spikes: [
-      { x: 460, y: 360 }, { x: 492, y: 360 },
-      { x: 840, y: 360 }, { x: 872, y: 360 },
-      { x: 1210, y: 360 }, { x: 1242, y: 360 },
-      { x: 1610, y: 360 },
-      { x: 1910, y: 360 }, { x: 1942, y: 360 },
+      // On ground (0-400)
+      { x: 330, y: 360 }, { x: 362, y: 360 },
+      // On ground (500-800)
+      { x: 730, y: 360 }, { x: 762, y: 360 },
+      // On ground (880-1130)
+      { x: 1060, y: 360 }, { x: 1092, y: 360 },
+      // On ground (1250-1600)
+      { x: 1530, y: 360 },
+      // On ground (1950-2250)
+      { x: 2180, y: 360 }, { x: 2212, y: 360 },
     ],
     chests: [
       { x: 1160, y: 128, skinIndex: 7 },
     ],
     boss: { type: 'spider_queen', x: 2500, y: 310, hp: 5, patrolRange: 140 },
-    hearts: [
-    ],
+    hearts: [],
     playerSpawn: { x: 60, y: 300 },
     flagPos: { x: 2700, y: 320 },
   },
@@ -584,12 +611,18 @@ export const LEVELS: LevelData[] = [
       { x: 2400, y: 344, patrolRange: 80 },
     ],
     spikes: [
-      { x: 380, y: 360 }, { x: 412, y: 360 },
-      { x: 710, y: 360 }, { x: 742, y: 360 },
-      { x: 1060, y: 360 }, { x: 1092, y: 360 },
-      { x: 1360, y: 360 },
-      { x: 1760, y: 360 }, { x: 1792, y: 360 },
-      { x: 2110, y: 360 }, { x: 2142, y: 360 },
+      // On ground (0-350)
+      { x: 280, y: 360 }, { x: 312, y: 360 },
+      // On ground (420-670)
+      { x: 600, y: 360 }, { x: 632, y: 360 },
+      // On ground (750-1050)
+      { x: 980, y: 360 }, { x: 1012, y: 360 },
+      // On ground (1400-1750)
+      { x: 1680, y: 360 },
+      // On ground (1800-2050)
+      { x: 1980, y: 360 }, { x: 2012, y: 360 },
+      // On ground (2150-2450)
+      { x: 2380, y: 360 }, { x: 2412, y: 360 },
     ],
     bats: [
       { x: 500, y: 150, patrolRange: 100, amplitude: 30, frequency: 0.035 },
@@ -598,14 +631,13 @@ export const LEVELS: LevelData[] = [
     ],
     movingSpikes: [
       { startX: 800, startY: 360, endX: 1000, endY: 360, speed: 0.006 },
-      { startX: 1600, startY: 360, endX: 1750, endY: 360, speed: 0.007 },
+      { startX: 1850, startY: 360, endX: 2000, endY: 360, speed: 0.007 },
     ],
     chests: [
       { x: 1030, y: 88, skinIndex: 8 },
     ],
     boss: { type: 'jungle_hawk', x: 2700, y: 280, hp: 5, patrolRange: 150 },
-    hearts: [
-    ],
+    hearts: [],
     playerSpawn: { x: 60, y: 280 },
     flagPos: { x: 2900, y: 320 },
   },
@@ -666,13 +698,20 @@ export const LEVELS: LevelData[] = [
       { x: 2500, y: 344, patrolRange: 120 },
     ],
     spikes: [
-      { x: 340, y: 360 }, { x: 372, y: 360 },
-      { x: 640, y: 360 }, { x: 672, y: 360 },
-      { x: 980, y: 360 }, { x: 1012, y: 360 },
-      { x: 1320, y: 360 }, { x: 1352, y: 360 },
-      { x: 1580, y: 360 },
-      { x: 1940, y: 360 }, { x: 1972, y: 360 },
-      { x: 2240, y: 360 }, { x: 2272, y: 360 },
+      // On ground (0-300)
+      { x: 230, y: 360 }, { x: 262, y: 360 },
+      // On ground (380-580)
+      { x: 510, y: 360 }, { x: 542, y: 360 },
+      // On ground (680-980)
+      { x: 910, y: 360 }, { x: 942, y: 360 },
+      // On ground (1020-1270)
+      { x: 1200, y: 360 }, { x: 1232, y: 360 },
+      // On ground (1620-1920)
+      { x: 1850, y: 360 },
+      // On ground (1980-2180)
+      { x: 2110, y: 360 }, { x: 2142, y: 360 },
+      // On ground (2280-2630)
+      { x: 2560, y: 360 }, { x: 2592, y: 360 },
     ],
     bats: [
       { x: 400, y: 130, patrolRange: 100, amplitude: 35, frequency: 0.035 },
@@ -681,16 +720,15 @@ export const LEVELS: LevelData[] = [
       { x: 2200, y: 140, patrolRange: 80, amplitude: 30, frequency: 0.035 },
     ],
     movingSpikes: [
-      { startX: 600, startY: 360, endX: 800, endY: 360, speed: 0.007 },
-      { startX: 1200, startY: 300, endX: 1200, endY: 360, speed: 0.006 },
-      { startX: 1900, startY: 360, endX: 2100, endY: 360, speed: 0.007 },
+      { startX: 720, startY: 360, endX: 920, endY: 360, speed: 0.007 },
+      { startX: 1660, startY: 300, endX: 1660, endY: 360, speed: 0.006 },
+      { startX: 2020, startY: 360, endX: 2140, endY: 360, speed: 0.007 },
     ],
     chests: [
       { x: 1840, y: 68, skinIndex: 9 },
     ],
     boss: { type: 'stone_guardian', x: 2900, y: 300, hp: 6, patrolRange: 140 },
-    hearts: [
-    ],
+    hearts: [],
     playerSpawn: { x: 60, y: 240 },
     flagPos: { x: 3100, y: 320 },
   },
@@ -758,14 +796,22 @@ export const LEVELS: LevelData[] = [
       { x: 2750, y: 344, patrolRange: 100 },
     ],
     spikes: [
-      { x: 310, y: 360 }, { x: 342, y: 360 },
-      { x: 610, y: 360 }, { x: 642, y: 360 },
-      { x: 940, y: 360 }, { x: 972, y: 360 },
-      { x: 1240, y: 360 }, { x: 1272, y: 360 },
-      { x: 1580, y: 360 }, { x: 1612, y: 360 },
-      { x: 1880, y: 360 }, { x: 1912, y: 360 },
-      { x: 2240, y: 360 }, { x: 2272, y: 360 },
-      { x: 2540, y: 360 }, { x: 2572, y: 360 },
+      // On ground (0-280)
+      { x: 210, y: 360 }, { x: 242, y: 360 },
+      // On ground (350-550)
+      { x: 480, y: 360 }, { x: 512, y: 360 },
+      // On ground (650-930)
+      { x: 860, y: 360 }, { x: 892, y: 360 },
+      // On ground (980-1180)
+      { x: 1110, y: 360 }, { x: 1142, y: 360 },
+      // On ground (1280-1580)
+      { x: 1510, y: 360 }, { x: 1542, y: 360 },
+      // On ground (1620-1800)
+      { x: 1750, y: 360 },
+      // On ground (1920-2200)
+      { x: 2130, y: 360 }, { x: 2162, y: 360 },
+      // On ground (2580-2880)
+      { x: 2810, y: 360 }, { x: 2842, y: 360 },
     ],
     bats: [
       { x: 350, y: 100, patrolRange: 100, amplitude: 35, frequency: 0.035 },
@@ -774,10 +820,10 @@ export const LEVELS: LevelData[] = [
       { x: 1900, y: 110, patrolRange: 80, amplitude: 35, frequency: 0.035 },
     ],
     movingSpikes: [
-      { startX: 500, startY: 360, endX: 700, endY: 360, speed: 0.007 },
-      { startX: 1100, startY: 360, endX: 1300, endY: 360, speed: 0.008 },
-      { startX: 1700, startY: 280, endX: 1700, endY: 360, speed: 0.006 },
-      { startX: 2300, startY: 360, endX: 2500, endY: 360, speed: 0.008 },
+      { startX: 700, startY: 360, endX: 900, endY: 360, speed: 0.007 },
+      { startX: 1320, startY: 360, endX: 1520, endY: 360, speed: 0.008 },
+      { startX: 1960, startY: 280, endX: 1960, endY: 360, speed: 0.006 },
+      { startX: 2620, startY: 360, endX: 2820, endY: 360, speed: 0.008 },
     ],
     chests: [
       { x: 2240, y: 48, skinIndex: 10 },
