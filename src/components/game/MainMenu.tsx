@@ -9,6 +9,7 @@ interface MainMenuProps {
   onLeaderboard: () => void;
   onAuth: () => void;
   onLogout: () => void;
+  onDevMode?: () => void;
   totalCoins: number;
   hasDailyReward: boolean;
   unclaimedAchievements: number;
