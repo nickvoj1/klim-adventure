@@ -1,5 +1,6 @@
 import { Player, Robot, Bullet, Coin, Chest, Spike, MovingSpike, Bat, HeartPickup, Flag, Platform, LevelData, Skin } from './types';
 import { CANVAS_WIDTH, CANVAS_HEIGHT } from './constants';
+import { spriteManager } from './sprites';
 
 // ===== UTILITIES =====
 
